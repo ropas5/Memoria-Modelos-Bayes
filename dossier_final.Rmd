@@ -1,0 +1,308 @@
+---
+title: "Dossier - Modelos Bayesianos"
+author: "Iker Cuadros Ruiz y Roger Pastor Juan"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, warning=FALSE}
+if (!require(extraDistr)) install.packages("extraDistr")
+library(extraDistr)
+
+if (!require(modeest)) install.packages("modeest")
+library(modeest) # Para calcular la moda
+
+if (!require(LaplacesDemon)) install.packages("LaplacesDemon")
+library(LaplacesDemon)
+
+if (!require(MASS)) install.packages("MASS")
+library(MASS)
+
+if (!require(metRology)) install.packages("metRology")
+library(metRology)
+
+if (!require(jagsUI)) install.packages("jagsUI")
+library(jagsUI)
+```
+
+# PRÁCTICA 1: ELEMENTOS ESTADÍSTICA BAYESIANA
+
+## **Actividad 1:** Conciertos y asientos
+
+¡Este fin de semana me voy de concierto a un festival! Al llegar a la
+entrada con mis dos amigas nos encontramos con la siguiente situación:
+solo hay $100$ sillas y se han vendido $120$ entradas, por lo que no hay
+asientos para todas las personas. Sin entrar a valorar como se consigue
+el asiento, es decir, asumiendo que se consigue de forma aleatoria,
+considera la variable aleatoria que indica cuantas de mis amigas
+(incluida yo) conseguimos asiento.
+
+**Ayuda:** utiliza probabilidades condicionadas y ten cuidado con el
+reemplazamiento.
+
+Nuestra variable de interés será X que se representa como cuantos amigos
+consiguen un asiento.
+
+-   Calcula y representa su función de probabilidad.
+
+Hay 4 posibles casos de X, $X = \{0,1,2,3\}$
+
+Para $X=0$:
+
+$$P(X=0)=P(S1^{c}) \cap P(S2^{c}) \cap P(S3^{c})$$
+
+$$P(X=0)=\frac{20}{120} \cdot \frac{19}{119} \cdot \frac{18}{118}= \frac{57}{14042}=0.004$$
+$$P(X=0)=0.004$$
+
+Para $X = 1$:
+
+$$
+P(X=1)=P(S1 \cap S2^{c} \cap S3^{c}) + P(S1^{c} \cap S2 \cap S3^{c}) + P(S1^{c} \cap S2^{c} \cap S3)
+$$
+
+$$
+P(X=1) = \\
+    P(S1 | S2^{c} \cap S3^{c}) \cdot P(S2^{c} | S3^{c}) \cdot P(S3^{c}) + \\
+    P(S1^{c} | S2 \cap S3^{c}) \cdot P(S2 | S3^{c}) \cdot P(S3^{c}) +\\
+    P(S1^{c} | S2^{c} \cap S3) \cdot P(S2^{c} | S3) \cdot P(S3)
+$$
+
+$$
+P(X=1) = 3 \cdot \left( \frac{100 \cdot 20 \cdot 19}{120 \cdot 119 \cdot 118} \right)
+$$
+
+$$
+P(X=1) = 0.068
+$$
+
+Para $X = 2$:
+
+$$
+P(X=2)=P(S1 \cap S2 \cap S3^{c}) + P(S1 \cap S2^{c} \cap S3) + P(S1^{c} \cap S2 \cap S3)
+$$
+
+$$
+P(X=2) = \\
+    P(S1 | S2 \cap S3^{c}) \cdot P(S2 | S3^{c}) \cdot P(S3^{c}) + \\
+    P(S1 | S2^{c} \cap S3) \cdot P(S2^{c} | S3) \cdot P(S3) +\\
+    P(S1^{c} | S2 \cap S3) \cdot P(S2 | S3) \cdot P(S3)
+$$
+
+$$
+P(X=1) = 3 \cdot \left( \frac{99 \cdot 100 \cdot 20}{118 \cdot 119 \cdot 120} \right)
+$$
+
+$$
+P(X=2) = 0.3525
+$$
+
+Para $X=3$:
+
+$$P(X=0)=P(S1) \cap P(S2) \cap P(S3)$$
+
+$$P(X=0)=\frac{100}{120} \cdot \frac{99}{119} \cdot \frac{98}{118}= \frac{1155}{2006}=0.576$$
+$$P(X=0)=0.576$$
+
+-   Calcula y representa su función de distribución.
+
+$$
+F_{X}(x) = 
+\left\{
+\begin{array}{ll}
+0, -\infty \le x \le 0 \\
+0.004, 0 \le x \lt 1 \\
+0.072, 1 \le x \lt 2 \\
+0.4245, 2 \le x \le 3 \\
+1, 3 \le x \le \infty \\
+\end{array}
+\right.
+$$
+
+```{r}
+# Definir las secciones de x y F(x)
+x <- c(-Inf, 0, 1, 2, 3, Inf)
+F_x <- c(0, 0, 0.004, 0.072, 0.4245, 1)
+x_plot <- c(-10, 0, 1, 2, 3, 10)
+F_plot <- c(0, 0, 0.004, 0.072, 0.4245, 1)
+
+# Graficar
+plot(x_plot, F_plot, type = "s", lwd = 2, col = "blue", 
+     xlab = "x", ylab = "F_X(x)", 
+     main = "Función de Distribución Acumulativa (CDF)")
+grid()
+points(x_plot, F_plot, pch = 19, col = "red")
+```
+
+-   Calcula la probabilidad de que al menos una de nosotras haya
+    conseguido (no importa cual) asiento utilizando la función de
+    probabilidad.
+
+$$
+P(X \ge 1) = 1 - P(X \lt 1) = 1 - P(X=0)
+$$
+
+$$
+P(X \ge 1) = 1 - 0.004 = 0.996
+$$
+
+-   Calcula la probabilidad de que al menos una de nosotras haya
+    conseguido (no importa cual) asiento utilizando la función de
+    distribución.
+
+$$
+P(X \ge 1) = F_{X}(3) - F_{X}(0) = 1 - 0.004 = 0.996
+$$
+
+-   La probabilidad de que una de nosotras se tome una bebida depende de
+    si se sienta ($0.3$) o no ($0.6$). Sabiendo que he tomado algo,
+    calcula la probabilidad de que me haya sentado.
+
+$$
+P(S|B) = \frac{P(B|S) \cdot P(S)}{P(B)} =  \frac{P(B|S) \cdot P(S)}{P(B|S) \cdot P(B) + P(B|S^{c}) \cdot P(S^{c})}
+$$
+
+$$
+P(S|B) = \frac{0.3 \cdot \left( \frac{100}{120} \right)}{0.3 \cdot \left( \frac{100}{120} \right) + 0.6 \cdot \left( 1- \frac{100}{120} \right)}
+$$
+
+$$
+P(S|B) = \frac{5}{7} \approx 0.7143
+$$
+
+-   A última hora se han apuntado dos amigos tardones. Sabiendo que
+    nosotras nos hemos sentado las tres y que ellos beben siempre,
+    calcula la probabilidad de que nos hayamos tomado algo todos.
+    
+$$
+P(B|S) \cdot P(B|S) \cdot P(B|S) \cdot 1 \cdot 1 = 0.3 \cdot 0.3 \cdot 0.3 \cdot 1 \cdot 1 = 0.027
+$$
+
+## **Actividad 2:** Viajes y COVID
+
+Mañana te vas de viaje a un país que te pide una prueba de antígenos
+negativa para poder entrar. Aunque tu vacuna te da tranquilidad, ¿crees
+que las personas que viven en ese país pueden estar tranquilas con tu
+viaje allí? Dicho de otra manera, ¿cómo de posible es que tengas COVID
+aunque hayas dado negativo en la prueba de antígenos? El siguiente guión
+te ayudará:
+
+-   Asume una incidencia de COVID de $100$ casos por cada $100.000$
+    habitantes.
+-   Según se refleja en el prospecto del test empleado, su sensibilidad
+    (probabilidad de dar positivo si se está enfermo) es del $72 \%$ y
+    su especificidad (probabilidad de dar negativo si no se está
+    enfermo) es del $99 \%$.
+
+$$
+P(C) = 0.001 \ ; \ P(C^{c}) = 0.999 \\
+P(+ | C) = 0.72 \ ; \ P(- | C) = 0.28 \\
+P(+ | C^{c}) = 0.01 \ ; \ P(- | C^{c}) = 0.99 \\
+$$
+
+-   Calcula la probabilidad de tener COVID condicionado a que has dado
+    negativo.
+
+$$
+P(C|-) = \frac{P(-|C) \cdot P(C)}{P(-)} =  \frac{P(-|C) \cdot P(C)}{P(-|C) \cdot P(C) + P(-|C^{c}) \cdot P(C^{c})}
+$$
+
+$$
+P(C|-) = \frac{0.28 \cdot 0.001}{0.28 \cdot 0.001 + 0.99 \cdot 0.999} = 0.00028
+$$
+
+-   Observa cómo se actualiza la probabilidad de tener COVID tras
+    conocer que has dado negativo. Valora el cambio.
+
+Vemos que ahora la probabilidad de tener COVID es realmente baja
+comparada con la inicial
+
+Visto el resultado anterior te planteas si esta probabilidad de tener
+COVID tras saber que has dado negativo es la misma en todas las
+Comunidades, independientemente de su incidencia.
+
+-   Valora si la probabilidad condicionada anterior variaría para otra
+    persona de otra Comunidad en la que la incidencia fuera de $500$
+    casos por cada $100.000$ habitantes.
+
+$$
+P(C) = 0.005 \ ; \ P(C^{c}) = 0.995 \\
+$$
+
+$$
+P(C|-) = \frac{P(-|C) \cdot P(C)}{P(-)} =  \frac{P(-|C) \cdot P(C)}{P(-|C) \cdot P(C) + P(-|C^{c}) \cdot P(C^{c})}
+$$
+
+$$
+P(C|-) = \frac{0.28 \cdot 0.005}{0.28 \cdot 0.005 + 0.99 \cdot 0.995} = 0.00014
+$$
+
+-   A la vista del resultado anterior ¿crees que es relevante que las
+    pruebas de antígenos se recomienden solo a las personas con síntomas
+    de COVID o crees que son igualmente recomendables,
+    independientemente de que se presenten o no síntomas?
+
+    Viendo los resultados creo que no es relevante casi que una persona
+    sin sintomas se haga una prueba de antigenos.
+
+Un familiar tuyo se ha hecho la misma prueba pero ha dado positivo.
+
+-   ¿Cual es la probabilidad de que tenga COVID dado que ha dado
+    positivo? Para calcular esta probabilidad, ¿has tenido que rehacer
+    muchos cálculos o te ha valido una sola operación? Comenta el
+    porqué.
+
+    Ya conocemos la $P(C | -)$, por tanto podremos calcularlo con 1 sola
+    operación:
+
+$$
+P(C|+) = 1 - P(C|-) = 1 - \frac{28}{98929} = 0.99972
+$$
+
+Como tu familiar no está de acuerdo con el resultado, se hace otra
+prueba y da negativo.
+
+-   Actualiza la probabilidad de tener COVID del apartado anterior
+    condicionado ahora que en la segunda prueba ha dado negativo.
+-   Compara la probabilidad anterior con la probabilidad condicionada
+    que obtendrías de tener COVID en caso de que tu familiar se hubiera
+    hecho ambos tests a la vez, con idéntico resultado a lo anterior (un
+    positivo y un negativo).
+    
+$$
+P(C|+,-) = \frac{P(-|C,+) \cdot P(C|+)}{P(-|+)} = \frac{P(-|C) \cdot P(C|+)}{P(-|C) \cdot P(C|+) + P(-|C^{c}) \cdot P(C^{c}|+)}
+$$
+
+$$
+P(C|+,-) = \frac{0.28 \cdot 0.99972}{0.28 \cdot 0.99972 + 0.99 \cdot P(C^{c}|+)}
+$$
+Por ahora no podemos seguir con el calculo, por tanto calculamos $P(C^{c}|+)$:
+
+$$
+P(C^{c}|+) = \frac{P(+|C^{c}) \cdot P(C^{c})}{P(+|C^{c}) \cdot P(C^{c}) + P(+|C) \cdot P(C)}
+$$
+
+$$
+P(C^{c}|+) = \frac{0.01 \cdot 0.999}{0.01 \cdot 0.999 + 0.72 \cdot 0.001}
+$$
+
+$$
+P(C^{c}|+) = 0.9328
+$$
+
+Ya podemos seguir con los calculos anteriores:
+
+$$
+P(C|+,-) = \frac{0.28 \cdot 0.99972}{0.28 \cdot 0.99972 + 0.99 \cdot P(C^{c}|+)}
+$$
+
+$$
+P(C|+,-) = \frac{0.28 \cdot 0.99972}{0.28 \cdot 0.99972 + 0.99 \cdot 0.9328}
+$$
+
+$$
+P(C|+,-) = 0.2326
+$$
