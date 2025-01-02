@@ -6,6 +6,9 @@ output:
   pdf_document:
         latex_engine: xelatex
   html_document: default
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r setup, include=FALSE}
@@ -182,7 +185,7 @@ $$
 -   A última hora se han apuntado dos amigos tardones. Sabiendo que
     nosotras nos hemos sentado las tres y que ellos beben siempre,
     calcula la probabilidad de que nos hayamos tomado algo todos.
-    
+
 $$
 P(B|S) \cdot P(B|S) \cdot P(B|S) \cdot 1 \cdot 1 = 0.3 \cdot 0.3 \cdot 0.3 \cdot 1 \cdot 1 = 0.027
 $$
@@ -277,15 +280,15 @@ prueba y da negativo.
     que obtendrías de tener COVID en caso de que tu familiar se hubiera
     hecho ambos tests a la vez, con idéntico resultado a lo anterior (un
     positivo y un negativo).
-    
+
 $$
 P(C|+,-) = \frac{P(-|C,+) \cdot P(C|+)}{P(-|+)} = \frac{P(-|C) \cdot P(C|+)}{P(-|C) \cdot P(C|+) + P(-|C^{c}) \cdot P(C^{c}|+)}
 $$
 
 $$
 P(C|+,-) = \frac{0.28 \cdot 0.99972}{0.28 \cdot 0.99972 + 0.99 \cdot P(C^{c}|+)}
-$$
-Por ahora no podemos seguir con el calculo, por tanto calculamos $P(C^{c}|+)$:
+$$ Por ahora no podemos seguir con el calculo, por tanto calculamos
+$P(C^{c}|+)$:
 
 $$
 P(C^{c}|+) = \frac{P(+|C^{c}) \cdot P(C^{c})}{P(+|C^{c}) \cdot P(C^{c}) + P(+|C) \cdot P(C)}
@@ -319,78 +322,88 @@ $$
 
 ## Actividad 1
 
-Para cada una de las situaciones que se describen a continuación construye un modelo probabilístico apropiado, enumerando: la variable de interés, su distribución de probabilidad
-correspondiente, los datos, el parámetro de interés y los valores posibles posibles que puede
-tomar.
+Para cada una de las situaciones que se describen a continuación
+construye un modelo probabilístico apropiado, enumerando: la variable de
+interés, su distribución de probabilidad correspondiente, los datos, el
+parámetro de interés y los valores posibles posibles que puede tomar.
 
 **Escenario 1:** Estimación de la altura media de los alumnos de la ETSE
 
-Se pretende estimar la altura media de los alumnos de la ETSE, con ese objetivo recogimos la
-altura de cada uno de los alumnos de un grupo de prácticas de Modelos Bayesianos. Dichas
-alturas son: (168, 174, 182, 167, 168, 155, 154, 164, 154, 160, 176, 165, 149, 160, 177, 150,
-179, 174). Asumiremos la desviación típica de las alturas de los alumnos de la ETSE como
-un valor conocido e igual a 10 unidades.
+Se pretende estimar la altura media de los alumnos de la ETSE, con ese
+objetivo recogimos la altura de cada uno de los alumnos de un grupo de
+prácticas de Modelos Bayesianos. Dichas alturas son: (168, 174, 182,
+167, 168, 155, 154, 164, 154, 160, 176, 165, 149, 160, 177, 150, 179,
+174). Asumiremos la desviación típica de las alturas de los alumnos de
+la ETSE como un valor conocido e igual a 10 unidades.
 
-- Variable de Interés: $X$ -> Altura, en cm, de los alumnos de la ETSE
+-   Variable de Interés: $X$ -\> Altura, en cm, de los alumnos de la
+    ETSE
 
-- Distribución de Probabilidad: $X \sim N(\mu, \sigma^2 = 10^2)$
+-   Distribución de Probabilidad: $X \sim N(\mu, \sigma^2 = 10^2)$
 
-- Datos: listado comn 18 alturas (168, 174, 182, 167, 168, 155, 154, 164, 154, 160, 176, 165, 149, 160, 177, 150, 179, 174)
+-   Datos: listado comn 18 alturas (168, 174, 182, 167, 168, 155, 154,
+    164, 154, 160, 176, 165, 149, 160, 177, 150, 179, 174)
 
-- Parámetro de Interés: $\mu$ (media de alturas, en cm, de los alumnos de la ETSE)
+-   Parámetro de Interés: $\mu$ (media de alturas, en cm, de los alumnos
+    de la ETSE)
 
-- Valores posibles que puede tomar: $\mu \in R^+$
+-   Valores posibles que puede tomar: $\mu \in R^+$
 
-**Escenario 2:** Estimación del número medio de palabras en una página de Game
-of Thrones
+**Escenario 2:** Estimación del número medio de palabras en una página
+de Game of Thrones
 
-Estamos interesados en estimar el número medio de palabras por página del libro Game of
-Thrones. Para ello se toma una muestra aleatoria de 10 páginas del libro donde se observan
-los siguientes números de palabras por página: (103, 94, 96, 95, 103, 116, 97, 87, 114, 101,
-90, 96, 83, 72).
+Estamos interesados en estimar el número medio de palabras por página
+del libro Game of Thrones. Para ello se toma una muestra aleatoria de 10
+páginas del libro donde se observan los siguientes números de palabras
+por página: (103, 94, 96, 95, 103, 116, 97, 87, 114, 101, 90, 96, 83,
+72).
 
-- Variable de Interés: $Y$ -> Número de palabras por página
+-   Variable de Interés: $Y$ -\> Número de palabras por página
 
-- Distribución de Probabilidad: $Y \sim Poisson(\lambda)$
+-   Distribución de Probabilidad: $Y \sim Poisson(\lambda)$
 
-- Datos: Muestra aleatoria de 14 páginas donde se observan
-los siguientes números de palabras por página (103, 94, 96, 95, 103, 116, 97, 87, 114, 101,
-90, 96, 83, 72).
+-   Datos: Muestra aleatoria de 14 páginas donde se observan los
+    siguientes números de palabras por página (103, 94, 96, 95, 103,
+    116, 97, 87, 114, 101, 90, 96, 83, 72).
 
-- Parámetro de Interés: $\lambda$ (media de palabras por página)
+-   Parámetro de Interés: $\lambda$ (media de palabras por página)
 
-- Valores posibles que puede tomar: $\lambda \in N^+$
+-   Valores posibles que puede tomar: $\lambda \in N^+$
 
-**Escenario 3:** Estimación de la frecuencia de paso de la línea 63 por el Campus
-de Burjassot
+**Escenario 3:** Estimación de la frecuencia de paso de la línea 63 por
+el Campus de Burjassot
 
-Queremos estudiar la frecuencia de paso de los autobuses de la línea 63 por el campus de
-Burjassot. Para ello se recoge el tiempo entre llegadas de los autobuses a la parada situada
-frente al campus. Dichos tiempos en minutos son: (15.7, 16.9, 22.8, 12.1, 36.1, 22.5, 12.9,
-14.6, 26.2, 15.6). Asumiremos que los tiempos de llegada son completamente independientes
-entre sí, por lo que la distribución de tiempos entre llegadas se adecúa a una distribución
-exponencial
+Queremos estudiar la frecuencia de paso de los autobuses de la línea 63
+por el campus de Burjassot. Para ello se recoge el tiempo entre llegadas
+de los autobuses a la parada situada frente al campus. Dichos tiempos en
+minutos son: (15.7, 16.9, 22.8, 12.1, 36.1, 22.5, 12.9, 14.6, 26.2,
+15.6). Asumiremos que los tiempos de llegada son completamente
+independientes entre sí, por lo que la distribución de tiempos entre
+llegadas se adecúa a una distribución exponencial
 
-- Variable de Interés: $Z$ -> Tiempo entre llegadas de los autobuses
+-   Variable de Interés: $Z$ -\> Tiempo entre llegadas de los autobuses
 
-- Distribución de Probabilidad: $Z \sim Exp(\lambda)$
+-   Distribución de Probabilidad: $Z \sim Exp(\lambda)$
 
-- Datos: Tiempo entre llegadas de los autobuses a la parada situada
-frente al campus. (15.7, 16.9, 22.8, 12.1, 36.1, 22.5, 12.9,
-14.6, 26.2, 15.6)
+-   Datos: Tiempo entre llegadas de los autobuses a la parada situada
+    frente al campus. (15.7, 16.9, 22.8, 12.1, 36.1, 22.5, 12.9, 14.6,
+    26.2, 15.6)
 
-- Parámetro de Interés: $\frac{1}{\lambda}$ (media de tiempo entre llegadas de los autobuses)
+-   Parámetro de Interés: $\frac{1}{\lambda}$ (media de tiempo entre
+    llegadas de los autobuses)
 
-- Valores posibles que puede tomar: $[0, +\infty)$
+-   Valores posibles que puede tomar: $[0, +\infty)$
 
 ## Actividad 2
 
-Volviendo al escenario 1 de los descritos en la actividad anterior, y haciendo uso del formulario de estadística bayesiana que tenéis disponible en el aula virtual resuelve las siguientes
-cuestiones:
+Volviendo al escenario 1 de los descritos en la actividad anterior, y
+haciendo uso del formulario de estadística bayesiana que tenéis
+disponible en el aula virtual resuelve las siguientes cuestiones:
 
-**1.-** Plantea una distribución previa conjugada para la altura media de los alumnos de la
-ETSE que asuma que dicha altura está en torno a 170 cm, con una desviación típica
-de 2 cm, y obtén la distribución a posteriori correspondiente.
+**1.-** Plantea una distribución previa conjugada para la altura media
+de los alumnos de la ETSE que asuma que dicha altura está en torno a 170
+cm, con una desviación típica de 2 cm, y obtén la distribución a
+posteriori correspondiente.
 
 Distribución previa conjugada (del formulario):
 
@@ -420,8 +433,9 @@ $$
 \mu | \vec{x} \sim N\left( \frac{7226}{43} ,\frac{100}{43}  \right) \simeq N\left( 168.05, \ 2.33 \right)
 $$
 
-**2.-** Representa las distribuciones a priori y a posteriori de la altura media de los alumnos
-de la ETSE obtenidas en el apartado anterior.
+**2.-** Representa las distribuciones a priori y a posteriori de la
+altura media de los alumnos de la ETSE obtenidas en el apartado
+anterior.
 
 ```{r}
 mu.prio <- 170
@@ -449,8 +463,8 @@ legend("topright", legend = c("Distribución a priori", "Distribución a posteri
 
 **3.-** Describe la distribución a posteriori:
 
-- mediante estimaciones puntuales tales como la media a posteriori, la moda a posteriori
-y la mediana a posteriori;
+-   mediante estimaciones puntuales tales como la media a posteriori, la
+    moda a posteriori y la mediana a posteriori;
 
 ```{r}
 
@@ -467,7 +481,7 @@ print(paste('La mediana es: ', mediana))
 
 ```
 
-- mediante un intervalo creíble del 95 % para la altura media
+-   mediante un intervalo creíble del 95 % para la altura media
 
 ```{r}
 
@@ -478,31 +492,32 @@ q975 <- qnorm(0.975, mean = mu.post, sd = sd.post)
 print(paste('El Intervalo de Credibilidad al 95% es: [', q025, ':', q975 ,']'))
 ```
 
-**4.-** Contrasta si la estatura media de los alumnos de la ETSE es inferior a 165 cm, la altura
-media de los alumnos de la UV. Muestra ambas probabilidades posteriores utilizadas
-en el contraste en una figura.
+**4.-** Contrasta si la estatura media de los alumnos de la ETSE es
+inferior a 165 cm, la altura media de los alumnos de la UV. Muestra
+ambas probabilidades posteriores utilizadas en el contraste en una
+figura.
 
-$H_0: \mu < 165$
-$H_a: \mu \geq 165$
+$H_0: \mu < 165$ $H_a: \mu \geq 165$
 
 ```{r}
 prob_post <- pnorm(165, mean = mu.post, sd = sd.post)
 prob_post
 ```
 
-$P(\mu < 165 | datos) = 0.0235$ 
+$P(\mu < 165 | datos) = 0.0235$
 
 Se rechaza la hipótesis nula
 
-**5.-** Obtén la distribución de la altura de un nuevo alumno cualquiera de la ETSE, tanto
-antes como después de haber observado los datos.
+**5.-** Obtén la distribución de la altura de un nuevo alumno cualquiera
+de la ETSE, tanto antes como después de haber observado los datos.
 
-Antes de haber observado los datos lo que se debe hacer es comprobar su distribución predictiva a priori.
+Antes de haber observado los datos lo que se debe hacer es comprobar su
+distribución predictiva a priori.
 
-La distribución predictiva a priori para una normal de la cual se conoce su varianza es la siguiente:
+La distribución predictiva a priori para una normal de la cual se conoce
+su varianza es la siguiente:
 
-$$x^* \sim  N(\nu, \sigma^2 + \tau^2)$$
-$$x^* \sim  N(170, 10^2 + 2^2)$$
+$$x^* \sim  N(\nu, \sigma^2 + \tau^2)$$ $$x^* \sim  N(170, 10^2 + 2^2)$$
 $$x^* \sim  N(\mu=170, \sigma^2=104)$$
 
 ```{r}
@@ -520,9 +535,11 @@ plot(x, dist.pred.priori, type = "l", col = "blue", lwd = 2,
 
 ```
 
-Si tenemos en cuenta los datos observados, entonces se utilizará la distribución predictiva a posteriori.
+Si tenemos en cuenta los datos observados, entonces se utilizará la
+distribución predictiva a posteriori.
 
-La distribución predictiva a posteriori para una normal de la cual se conoce su varianza es la siguiente:
+La distribución predictiva a posteriori para una normal de la cual se
+conoce su varianza es la siguiente:
 
 $$x^*| \textbf{x} \sim  N(w \cdot \nu + (1-w) \cdot \bar{x}, \sigma^2 + \frac{\sigma^2}{n} \cdot (1-w)), \space Donde \space w=\frac{\frac{\sigma^2}{n}}{\frac{\sigma^2}{n}+\tau^2} $$
 
@@ -550,8 +567,8 @@ legend("topright", legend = c("Distribución predictiva a priori", "Distribució
 
 ```
 
-**6.-** ¿Cuál es la probabilidad a priori de que la altura de este nuevo alumno sea superior a
-180 cm? ¿Y la a posteriori?
+**6.-** ¿Cuál es la probabilidad a priori de que la altura de este nuevo
+alumno sea superior a 180 cm? ¿Y la a posteriori?
 
 ```{r}
 # Probabilitat P(mu < 180) per a priori
@@ -562,12 +579,14 @@ pred_prob_pri
 pred_prob_post <- 1 - pnorm(180, mean = mu.pred.post, sd = sd.pred.post)
 pred_prob_post
 ```
+
 Se aceptan las hipótesis nulas
 
 ## Actividad 3
 
-Volviendo al escenario 3 de los descritos en la actividad anterior, y haciendo uso del formulario de estadística bayesiana que tenéis disponible en el aula virtual resuelve las siguientes
-cuestiones:
+Volviendo al escenario 3 de los descritos en la actividad anterior, y
+haciendo uso del formulario de estadística bayesiana que tenéis
+disponible en el aula virtual resuelve las siguientes cuestiones:
 
 ```{r}
 datos.iniciales <- c(15.7, 16.9, 22.8, 12.1, 36.1, 22.5, 12.9, 14.6, 26.2, 15.6)
@@ -575,20 +594,25 @@ n <- length(datos.iniciales)
 n
 ```
 
-**1.-** La EMT informa que la frecuencia de paso de los autobuses es de 15 minutos, por tanto
-debería llegar 1/15 autobuses por minuto. Plantea una distribución previa conjugada
-para el parámetro de la distribución exponencial (número de llegadas a la parada por
-minuto) acorde a esta información y con desviación típica de 0.05 unidades.
+**1.-** La EMT informa que la frecuencia de paso de los autobuses es de
+15 minutos, por tanto debería llegar 1/15 autobuses por minuto. Plantea
+una distribución previa conjugada para el parámetro de la distribución
+exponencial (número de llegadas a la parada por minuto) acorde a esta
+información y con desviación típica de 0.05 unidades.
 
-Vamos a obtener los valores de a y b de la distribución a priori conjugada:
+Vamos a obtener los valores de a y b de la distribución a priori
+conjugada:
 
 Tenemos que $\frac{a}{b} = \frac{1}{15}$, por tanto, $a = \frac{b}{15}$
 
-Por otro lado, tenemos que $\frac{a}{b^2}=0.05^2$ de donde obtenemos que $a = 0.05^2 \cdot b^2$
+Por otro lado, tenemos que $\frac{a}{b^2}=0.05^2$ de donde obtenemos que
+$a = 0.05^2 \cdot b^2$
 
-Con esto podemos obtener los valores de $a$ y $b$ que son los siguientes: $a = \frac{16}{9}$ y $b=\frac{80}{3}$
+Con esto podemos obtener los valores de $a$ y $b$ que son los
+siguientes: $a = \frac{16}{9}$ y $b=\frac{80}{3}$
 
-Y por tanto, podemos definir la distribución a priori conjugada de $\frac{1}{\lambda}$
+Y por tanto, podemos definir la distribución a priori conjugada de
+$\frac{1}{\lambda}$
 
 $$
 \frac{1}{\lambda} \sim Gamma(a, b) = Gamma(\frac{16}{9}, \frac{80}{3})
@@ -605,7 +629,10 @@ plot(x, dist.priori, type = "l", col = "blue", lwd = 2,
      xlab = "x", ylab = "f(x)")
 ```
 
-**2.-** Calcula la distribución a posteriori correspondiente a esta prior y resume dicha distribución mediante su media, moda y mediana a posteriori, así como un intervalo de credibilidad a posteriori del 95 %. Representa toda la información que has calculado.
+**2.-** Calcula la distribución a posteriori correspondiente a esta
+prior y resume dicha distribución mediante su media, moda y mediana a
+posteriori, así como un intervalo de credibilidad a posteriori del 95 %.
+Representa toda la información que has calculado.
 
 $$
 \frac{1}{\lambda} | x \sim Gamma\left(n+a, \ \sum_{i=1}^{n}{x_{i}}+b \right)
@@ -633,31 +660,31 @@ legend("topright", legend = c("Distribución predictiva a priori", "Distribució
 
 Calculo de:
 
-- Media de la gamma
+-   Media de la gamma
 
 ```{r}
 a.posteriori / b.posteriori
 ```
 
-- Moda de una gamma
+-   Moda de una gamma
 
 ```{r}
 (a.posteriori - 1)/b.posteriori
 ```
 
-- Mediana de una gamma
+-   Mediana de una gamma
 
 ```{r}
 mediana <- qgamma(0.5, shape = a.posteriori, rate = b.posteriori)
 mediana
 ```
 
+-   Intervalo de credibilidad al 95%
 
-- Intervalo de credibilidad al 95%
-
-**3.-** Según comentábamos, la EMT anuncia una tasa de llegada de 1/15 autobuses por
-minuto para el tramo horario en el que se han tomado las mediciones. Contrasta la
-hipótesis de que la tasa real de llegadas es menor que lo anunciado por la EMT.
+**3.-** Según comentábamos, la EMT anuncia una tasa de llegada de 1/15
+autobuses por minuto para el tramo horario en el que se han tomado las
+mediciones. Contrasta la hipótesis de que la tasa real de llegadas es
+menor que lo anunciado por la EMT.
 
 $$
 H_{0}: \lambda < 1/15 \\
@@ -668,7 +695,8 @@ $$
 pgamma(1/15, shape = a.posteriori, rate = b.posteriori)
 ```
 
-No hay evidencia suficiente para rechazar la hipótesis nula $H_{0}$ pero parece bastante probable que sea $> \frac{1}{15}$
+No hay evidencia suficiente para rechazar la hipótesis nula $H_{0}$ pero
+parece bastante probable que sea $> \frac{1}{15}$
 
 # PRÁCTICA 4: INFERENCIA BASADA EN SIMULACIÓN EN MODELOS MÁS COMPLEJOS
 
@@ -961,6 +989,342 @@ $H_1$ es más probable, pero tampoco por mucho.
 
 # PRÁCTICA 5: SIMULACIÓN MCMC CON JAGS
 
+### Actividad 1: Regresión logística con JAGS
+
+En $1986$ tuvo lugar uno de los más trágicos accidentes de la era
+espacial al explotar nada más despegar el transbordador espacial
+Challenger. Por lo que se pudo analizar después, el accidente se podría
+haber evitado si se hubiera conocido la alta probabilidad de fallo de
+unas piezas clave que controlaban la presión cuando bajaba la
+temperatura. Los siguientes datos muestran las temperaturas (en grados
+Farenheit) que había en las $23$ ocasiones previas que había realizado
+un lanzamiento y para cada una de ellas se presenta también el número de
+juntas tóricas rotas (de $6$). Las juntas tóricas eran algo importante
+para regular la presión en el momento del lanzamiento.
+
+|                                |     |     |     |     |     |     |     |     |     |     |     |     |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| Temperatura                    | 66  | 70  | 69  | 68  | 67  | 72  | 73  | 70  | 57  | 63  | 70  | 78  |
+| Número de juntas tóricas rotas | 0   | 1   | 0   | 0   | 0   | 0   | 0   | 0   | 1   | 1   | 1   | 0   |
+
+|                                |     |     |     |     |     |     |     |     |     |     |     |
+|------|------|------|------|------|------|------|------|------|------|------|------|
+| Temperatura                    | 67  | 53  | 67  | 75  | 70  | 81  | 76  | 79  | 75  | 76  | 58  |
+| Número de juntas tóricas rotas | 0   | 2   | 0   | 0   | 0   | 0   | 0   | 0   | 2   | 0   | 1   |
+
+Tu objetivo será analizar este conjunto de datos utilizando **JAGS**
+para simular de la muestra a posteriori con MCMC.
+
+1.  Describe en detalle el modelo que te permite explicar el número de
+    juntas tóricas rotas a través de la probabilidad de fallo en función
+    de la temperatura. A la hora de asignar distribución inicial a los
+    parámetros del modelo piensa que **JAGS**, la herramienta de
+    simulación que vamos a utilizar, no permite el uso de distribuciones
+    impropias ¿Qué propuesta de distribución inicial te parece adecuada
+    para estos parámetros y válida en **JAGS**?
+    
+    
+    
+    Variable de respuesta: Número de juntas tóricas rotas
+
+    Variable explicativa: Temperatura
+
+    Como son conteos de juntas tóricas rotas sabemos que la variable de
+    respuesta seguirá una distribución de Poisson y por tanto la
+    regresión a aplicar será la de Poisson.
+
+2.  Utiliza **JAGS** para hacer inferencia sobre el modelo de regresión
+    logística que acabas de describir.
+
+    El modelo descrito anteriormente podría adaptarse a lo siguiente:
+
+```{r}
+cat(
+"model {
+  
+  # Definimos la verosimilitud
+  for (i in 1:length(JUNTAS_ROTAS)) {
+    JUNTAS_ROTAS[i] ~ dpois(lambda[i])
+    log(lambda[i]) <- beta0 + beta1 * TEMPERATURAS[i]
+  }
+  
+  # A priori
+  beta0 ~ dnorm(0, 0.001)
+  beta1 ~ dnorm(0, 0.001)
+  
+}", file="modelos_jags/poissonReg.jags")
+```
+
+Con el modelo ya definido, definimos los argumentos que nos valdrán para
+ejecutarlo:
+
+```{r}
+datos <- list(JUNTAS_ROTAS = c(0,1,0,0,0,0,0,0,1,1,1,0,0,2,0,0,0,0,0,0,2,0,1),
+              TEMPERATURAS = c(66,70,69,68,67,72,73,70,57,63,70,78,67,53,67,75,70,81,76,79,75,76,58))
+
+iniciales <- function(){list(beta0=rnorm(1), beta1=rnorm(1))}
+
+parametros <- c('beta0', 'beta1')
+```
+
+Una vez disponemos de los argumentos llamamos a JAGS para llevar a cabo
+la simulación:
+
+```{r}
+set.seed(1)
+
+resul.pois <- jagsUI::jags(data = datos, inits=iniciales, parameters.to.save=parametros,
+                           model.file = 'modelos_jags/poissonReg.jags', 
+                           n.chains=5, n.iter=10000, n.burnin=1000, n.thin=15)
+
+resul.pois
+```
+
+3.  Valora la convergencia de la simulación utilizando la función
+    `traceplot`.
+
+```{r}
+traceplot(resul.pois)
+```
+
+Tal y como anticipan los valores de rhat y n.eff la convergencia parece
+buena.
+
+4.  Una vez simuladas las muestras de la distribución a posteriori de
+    ambos parámetros podemos utilizarlas para hacer inferencia.
+    Representa la estimación de la función de densidad de ambos
+    parámetros del modelo y resume de la manera que te parezca
+    conveniente su distribución a posteriori. Valora nuevamente si la
+    pendiente $\beta_{1}$ es mayor o menor que $0$ y qué implicación
+    tiene este resultado.
+
+```{r}
+plot(resul.pois)
+```
+
+5.  **JAGS** también puede ser utilizado para simular de distribuciones
+    predictivas. Por ejemplo, en el mismo modelo que has corrido
+    previamente, podrías añadir un par de líneas, una con la expresión
+    que calcula el valor de la probabilidad (o simplemente su logit)
+    para el valor que quieras predecir, y otra en la que generas el
+    valor que quieres predecir a partir de la probabilidad anterior.
+    Estima, utilizando **JAGS**, la distribución predictiva a posteriori
+    del número de juntas tóricas rotas a $28$ grados Fahrenheit ¿Qué
+    numero medio de juntas rotas esperarías encontrar en un cohete
+    lanzado a esa temperatura?
+
+    Modificamos el codigo anterior para poder contestar a las nuevas
+    preguntas.
+
+```{r}
+cat(
+"model{
+  # Definimos la verosimilitud
+  for (i in 1:length(JUNTAS_ROTAS)) {
+    JUNTAS_ROTAS[i] ~ dpois(lambda[i])
+    log(lambda[i]) <- beta0 + beta1 * TEMPERATURAS[i]
+  }
+    
+  # a priori
+  beta0 ~dnorm(0,0.0001)
+  beta1 ~dnorm(0,0.0001)
+  
+  #P roturas para 28 Fº
+  logit(pinueva)<-beta0+beta1*28
+  predictiva~dbin(pinueva,6)
+  
+}", file="modelos_jags/poissonReg2.jags")
+```
+
+Redifinimos los parametros:
+
+```{r}
+parametros <- c("beta0", "beta1", "predictiva", "pinueva")
+```
+
+Llamamos a JAGS para llevar a cabo la simulación:
+
+```{r}
+set.seed(1)
+
+resul.pois2 <- jagsUI::jags(data = datos, inits = iniciales, 
+                           parameters.to.save = parametros,
+                           model.file = 'modelos_jags/poissonReg2.jags', 
+                           n.chains=5, n.iter=10000, n.burnin=1000, n.thin=15)
+
+resul.pois2
+```
+
+
+
+### Actividad 2: Modelización de conteos haciendo uso de JAGS
+
+El archivo `mining.Rdata` contiene el número anual de accidentes
+observados (vector `Count`) en minas de carbón de el Reino Unido durante
+el periodo $1851$-$1962$. Adicionalmente, el vector `Year`, contiene el
+año correspondiente a cada obseración del periodo de estudio. Esta
+última variable ha sido centrada (con valores
+$-55.5, -54.5, \dots , 55.5$) para evitar problemas de colinealidad con
+el intercept. El objetivo de esta tarea es estudiar la evolución del
+número de accidentes anuales como función del año del periodo de
+estudio, obviando la estructura de dependencia temporal que pudiera
+mostrar dicha serie.
+
+1.  Describe en detalle un modelo que te permita explicar el número de
+    accidentes anuales en minas británicas en función del año del
+    periodo de estudio. Ten en cuenta nuevamente la limitación de
+    **JAGS** en cuanto al uso de distribuciones impropias.
+
+    Variable de respuesta: Número de accidentes en las minas
+
+    Variable explicativa: Año en el que se produjeron
+
+    Como son conteos de accidentes sabemos que la variable de respuesta
+    seguirá una distribución de Poisson y por tanto la regresión a
+    aplicar será la de Poisson.
+
+2.  Utiliza **JAGS** para hacer inferencia sobre el modelo de regresión
+    que acabas de plantear.
+
+```{r}
+cat(
+  "model{
+    #Verosimilitud
+    for (i in 1:length(Count)){
+      Count[i] ~ dpois(lambda[i])
+      log(lambda[i]) <- beta0 + beta1*Year[i]       
+    }
+    
+    # a priori
+    beta0 ~dnorm(0,0.0001)
+    beta1 ~dnorm(0,0.0001)
+  
+  }", file = "modelos_jags/accidentes.jags")
+```
+
+```         
+Con el modelo ya definido, definimos los argumentos que nos valdrán para ejecutarl:
+```
+
+```{r}
+Year <- c(1851, 1852, 1853, 1854, 1855, 1856, 1857, 1858, 1859,
+          1860, 1861, 1862, 1863, 1864, 1865, 1866, 1867, 1868,
+          1869, 1870, 1871, 1872, 1873, 1874, 1875, 1876, 1877,
+          1878, 1879, 1880, 1881, 1882, 1883, 1884, 1885, 1886,
+          1887, 1888, 1889, 1890, 1891, 1892, 1893, 1894, 1895, 
+          1896, 1897, 1898, 1899, 1900, 1901, 1902, 1903, 1904, 
+          1905, 1906, 1907, 1908, 1909, 1910, 1911, 1912, 1913,
+          1914, 1915, 1916, 1917, 1918, 1919, 1920, 1921, 1922,
+          1923, 1924, 1925, 1926, 1927, 1928, 1929, 1930, 1931,
+          1932, 1933, 1934, 1935, 1936, 1937, 1938, 1939, 1940, 
+          1941, 1942, 1943, 1944, 1945, 1946, 1947, 1948, 1949, 
+          1950, 1951, 1952, 1953, 1954, 1955, 1956, 1957, 1958, 
+          1959, 1960, 1961, 1962)
+# Modificamos la fecha para que podamos trabajar megor con el modelo, teniendo la media cntrada en 0
+media_anyo <- mean(Year)
+
+Year <- Year - media_anyo
+
+Count <- c(4, 5, 4, 1, 0, 4, 3, 4, 0, 6, 3, 3, 4, 0, 2, 6, 3, 3, 5, 4, 5, 3, 1, 
+           4, 4, 1, 5, 5, 3, 4, 2, 5, 2, 2, 3, 4, 2, 1, 3, 2, 2, 1, 1, 1, 1, 3, 
+           0, 0, 1, 0, 1, 1, 0, 0, 3, 1, 0, 3, 2, 2, 0, 1, 1, 1, 0, 1, 0, 1, 0, 
+           0, 0, 2, 1, 0, 0, 0, 1, 1, 0, 2, 3, 3, 1, 1, 2, 1, 1, 1, 1, 2, 4, 2, 
+           0, 0, 0, 1, 4, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1)
+
+datos <- list(Year = Year,
+              Count = Count)
+  
+iniciales <- function(){list(beta0 = rnorm(1), beta1 = rnorm(1))}
+
+parametros <- c("beta0", "beta1")
+```
+
+```         
+Una vez disponemos de los argumentos llamamos a JAGS para llevar a cabo la simulación:
+```
+
+```{r}
+set.seed(1)
+
+resul.pois3 <- jagsUI::jags(data=datos, inits= iniciales, parameters = parametros,
+                          model.file = "modelos_jags/accidentes.jags", n.chains = 3, 
+                          n.iter=10000, n.burnin = 1000, n.thin=15)
+
+resul.pois3 
+```
+
+3.  Valora la convergencia de la simulación utilizando la función
+    `traceplot`.
+
+```{r}
+traceplot(resul.pois3)
+```
+
+4.  Interpreta los resultados obtenidos, fundamentalmente en relación al
+    efecto del tiempo sobre el número de accidentes ¿De qué forma te
+    parece que influyen los años sobre el número de accidentes? ¿Es
+    dicha relación significativa? Da (e interpreta) un intervalo de
+    credibilidad al $95\%$ para el parámetro que controla dicha
+    relación.
+
+    Primero calculamos el intervalo de credibilidad al $95\%$
+
+    ```{r}
+    summary(resul.pois3)
+    ```
+
+    El intervalo de credibilidad al 95% de $\beta_1$ es $[-0.02354788,
+    -0.01394777]$ lo que significa que no incluye el valor 0. Por lo
+    tanto, la relación entre los años y el número de accidentes es
+    estadísticamente significativa. Como $\beta_1 < 0$ esto significa
+    que conforme aumentan los años se espera que el nuemro de accidentes
+    baje.
+
+5.  Genera una muestra de la distribución predictiva del número de
+    accidentes predichos al año siguiente de concluir el estudio ¿Que
+    probabilidad encuentras de que no haya ningún accidente ese año? ¿y
+    $2$ o más?
+
+    El modelo predictivo seria el siguiente: 
+$$
+    \lambda_{k+1}=e^{\beta_0 + \beta_1 Year_{k+1}}
+
+$$ 
+$$
+    Prediccio ~ Po(\lambda_{k+1})
+$$
+
+```{r}
+nuevo_anyo <- 1963 - media_anyo #al anño que queremos calcular le restamos la media para adecuar los datos conforme se ha entrenado al modelo
+
+beta0 <- 0.355
+  
+beta1 <- -0.019
+  
+lambda_predict <- exp(beta0 + beta1*nuevo_anyo)
+  
+  
+numero_accidentes <- rpois(1, lambda = lambda_predict)
+numero_accidentes
+
+```
+
+Calculamos la probabilidad de que no haya accidentes:
+
+$P(Count = 0)$
+
+```{r}
+dpois(0,lambda = lambda_predict)
+```
+
+Calculamos la probabilidad de que haya mas de 2 accidentes:
+
+$P(Count\ge 2) = 1- P(Count = 0)+ P(Count = 1)$
+
+```{r}
+1 - dpois(0,lambda = lambda_predict) + dpois(1,lambda = lambda_predict)
+```
+
 # PRÁCTICA 6: MODELIZACIÓN BAYESIANA AVANZADA
 
 ## Actividad 1: Diferencias entre operarios
@@ -1028,22 +1392,26 @@ resul.brillo
 
 ## Actividad 2: Más sobre fallos en maquinas
 
-Los siguientes datos corresponden al número de fallos de distintas bombas hidráulicas junto
-con el tiempo de funcionamiento de cada una de ellas (en miles de horas):
+Los siguientes datos corresponden al número de fallos de distintas
+bombas hidráulicas junto con el tiempo de funcionamiento de cada una de
+ellas (en miles de horas):
 
 ```{r}
 fallos <- c(5, 1, 5, 14, 3, 19, 1, 1, 4, 22)
 tiempo <- c(94.5, 15.7, 62.9, 126, 5.24, 31.4, 1.05, 1.05, 2.1, 10.5)
 ```
 
-Nuestro objetivo será modelizar el número de fallos ocurridos por cada 1000 horas de uso,
-pero cuidado, no tiene sentido modelizar dicho número directamente ya que si una máquina
-ha funcionado más tiempo debería tener más fallos ¿no? Así pues, modelizaremos el número
-de fallos asumiendo que su valor esperado es proporcional al tiempo de funcionamiento de
-la máquina. Estos pasos te ayudarán en el proceso:
+Nuestro objetivo será modelizar el número de fallos ocurridos por cada
+1000 horas de uso, pero cuidado, no tiene sentido modelizar dicho número
+directamente ya que si una máquina ha funcionado más tiempo debería
+tener más fallos ¿no? Así pues, modelizaremos el número de fallos
+asumiendo que su valor esperado es proporcional al tiempo de
+funcionamiento de la máquina. Estos pasos te ayudarán en el proceso:
 
-1. Formula un modelo que estudie el número de fallos de las bombas en función de su tiempo de uso, por cada 1000 horas. Utiliza JAGS para hacer inferencia y los estadísticos
-proporcionados para valorar la convergencia
+1.  Formula un modelo que estudie el número de fallos de las bombas en
+    función de su tiempo de uso, por cada 1000 horas. Utiliza JAGS para
+    hacer inferencia y los estadísticos proporcionados para valorar la
+    convergencia
 
 ```{r}
 cat(
@@ -1073,17 +1441,19 @@ resul.fallos1 <- jagsUI::jags(data = datos, inits = iniciales, parameters.to.sav
 resul.fallos1
 ```
 
-*Dado que no tenemos información inicial, utiliza para $\lambda$ la previa de Jeffreys del parámetro
-de la distribución de Poisson*
+*Dado que no tenemos información inicial, utiliza para* $\lambda$ la
+previa de Jeffreys del parámetro de la distribución de Poisson
 
-2. Una vez ajustado el modelo anterior nos planteamos que la tasa de fallos, por 1000
-horas de uso, podría variar de máquina a máquina. En realidad se dispone de más
-máquinas, aunque solo conocemos datos de éstas (siendo nuestro interés el cuantificar la
-variabilidad entre máquinas). Modeliza esta nueva situación con un modelo jerárquico
-(bayesiano) haciendo uso de JAGS, y sus estadísticos para valorar la convergencia
-de la simulación ¿Qué modelo de los que has ajustado te parece más oportuno en
-base al ajuste obtenido? ¿Encuentras diferencias entre máquinas según los intervalos
-de credibilidad de cada una de las máquinas que has estudiado?
+2.  Una vez ajustado el modelo anterior nos planteamos que la tasa de
+    fallos, por 1000 horas de uso, podría variar de máquina a máquina.
+    En realidad se dispone de más máquinas, aunque solo conocemos datos
+    de éstas (siendo nuestro interés el cuantificar la variabilidad
+    entre máquinas). Modeliza esta nueva situación con un modelo
+    jerárquico (bayesiano) haciendo uso de JAGS, y sus estadísticos para
+    valorar la convergencia de la simulación ¿Qué modelo de los que has
+    ajustado te parece más oportuno en base al ajuste obtenido?
+    ¿Encuentras diferencias entre máquinas según los intervalos de
+    credibilidad de cada una de las máquinas que has estudiado?
 
 ```{r}
 cat(
@@ -1116,4 +1486,3 @@ resul.fallos1 <- jagsUI::jags(data = datos, inits = iniciales, parameters.to.sav
                              n.iter = 5000, n.burnin = 1000, n.chains = 3, n.thin = 12)
 resul.fallos1
 ```
-
