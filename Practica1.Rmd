@@ -1,0 +1,34 @@
+---
+title: "Practica1"
+author: "Roger Pastor Juan"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## PRÀCTICA 1: ELEMENTS DE L’ ESTADÍSTICA BAYESIANA MODELS BAYESIANS. GRAU EN CIÈNCIA DE DADES
+
+### Activitat 1: Concerts i seients
+
+Aquest cap de setmana em vaig anar de concert amb les meues dues amigues a un
+festival! En arribar a l’entrada ens vam trobar amb la següent situació: només hi havia
+100 cadires i s’havien venut 120 entrades, de manera que no hi havia seients per a
+tothom. Assumint que s’aconseguia un seient de manera aleatòria, considera la variable
+aleatòria 𝑋𝑋 que indica quantes de les meues amigues (inclosa jo) vam aconseguir un
+seient. Ajuda: utilitza probabilitats condicionades i ves amb compte amb el
+reemplaçament.
+
+1. Calcula i representa la funció de probabilitat de 𝑋𝑋.
+2. Calcula i representa la funció de distribució de 𝑋𝑋.
+3. Utilitza la funció de probabilitat de 𝑋𝑋 per a calcular la probabilitat que al menys
+una de nosaltres aconseguis (no importa quina) un seient.
+4. Utilitza la funció de distribució de 𝑋𝑋 per a calcular la probabilitat que al menys
+una de nosaltres aconseguis (no importa quina) un seient.
+5. Sense fer cap càlcul (només els previs), calcula la probabilitat que cap de les tres
+amigues aconseguírem asseure’ns.
+6. La probabilitat que cadascuna de nosaltres demanara una beguda depenia de si
+estava (0.3) asseguda o no (0.6). Sabent que vaig demanar una beguda, calcula
+la probabilitat que estiguera asseguda.
