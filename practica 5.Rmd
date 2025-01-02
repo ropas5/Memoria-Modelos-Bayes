@@ -73,7 +73,11 @@ para simular de la muestra a posteriori con MCMC.
     
     Como son conteos de juntas tóricas rotas sabemos que la variable de respuesta seguirá una distribución de Poisson y por tanto la regresión a aplicar será la de Poisson.
     
-    Por tanto, el modelo podría adaptarse a lo siguiente:
+    
+2.  Utiliza **JAGS** para hacer inferencia sobre el modelo de regresión
+    logística que acabas de describir.
+    
+    El modelo descrito anteriormente podría adaptarse a lo siguiente:
 
 ```{r}
 cat(
@@ -89,7 +93,7 @@ cat(
   beta0 ~ dnorm(0, 0.001)
   beta1 ~ dnorm(0, 0.001)
   
-}", file="./jags_models/poissonReg.jags")
+}", file="poissonReg.jags")
 ```
 
 Con el modelo ya definido, definimos los argumentos que nos valdrán para ejecutarlo:
@@ -109,14 +113,11 @@ Una vez disponemos de los argumentos llamamos a JAGS para llevar a cabo la simul
 set.seed(1)
 
 resul.pois <- jagsUI::jags(data = datos, inits=iniciales, parameters.to.save=parametros,
-                           model.file = './jags_models/poissonReg.jags', 
+                           model.file = 'poissonReg.jags', 
                            n.chains=5, n.iter=10000, n.burnin=1000, n.thin=15)
 
 resul.pois
 ```
-
-2.  Utiliza **JAGS** para hacer inferencia sobre el modelo de regresión
-    logística que acabas de describir.
 
 3.  Valora la convergencia de la simulación utilizando la función
     `traceplot`.
@@ -151,10 +152,47 @@ plot(resul.pois)
     numero medio de juntas rotas esperarías encontrar en un cohete
     lanzado a esa temperatura?
     
-```{r}
-
-```
+    Modificamos el codigo anterior para poder contestar a las nuevas preguntas.
     
+```{r}
+cat(
+"model{
+  # verosimilitud
+    for ( i in 1:length(JUNTAS_ROTAS)){
+      JUNTAS_ROTAS[i] ~ dbin(p[i], 6)
+      logit(p[i]) <- beta0 + beta1*TEMPERATURAS[i] 
+    }
+    
+  # a priori
+  beta0 ~dnorm(0,0.0001)
+  beta1 ~dnorm(0,0.0001)
+  
+  #P roturas para 28 Fº
+  logit(pinueva)<-beta0+beta1*28
+  predictiva~dbin(pinueva,6)
+  
+}", file="poissonReg2.jags")
+```
+
+Redifinimos los parametros:
+
+```{r}
+parametros <- c("beta0", "beta1", "predictiva", "pinueva")
+```
+
+Llamamos a JAGS para llevar a cabo la simulación:
+
+```{r}
+set.seed(1)
+
+resul.pois2 <- jagsUI::jags(data = datos, inits = iniciales, 
+                           parameters.to.save = parametros,
+                           model.file = 'poissonReg2.jags', 
+                           n.chains=5, n.iter=10000, n.burnin=1000, n.thin=15)
+
+resul.pois2
+```
+
 
 ### Actividad 2: Modelización de conteos haciendo uso de JAGS
 
@@ -173,12 +211,77 @@ mostrar dicha serie.
     accidentes anuales en minas británicas en función del año del
     periodo de estudio. Ten en cuenta nuevamente la limitación de
     **JAGS** en cuanto al uso de distribuciones impropias.
-
+    
+    
+    
 2.  Utiliza **JAGS** para hacer inferencia sobre el modelo de regresión
     que acabas de plantear.
+    
+```{r}
+cat(
+  "model{
+    #Verosimilitud
+    for (i in 1:length(Count)){
+      Count[i] ~ dpois(lambda[i])
+      log(lambda[i]) <- beta0 + beta1*Year[i]       
+    }
+    
+    # a priori
+    beta0 ~dnorm(0,0.0001)
+    beta1 ~dnorm(0,0.0001)
+  
+  }", file = "accidentes.jags")
+```
+    Con el modelo ya definido, definimos los argumentos que nos valdrán para ejecutarlo:
+
+```{r}
+Year <- c(1851, 1852, 1853, 1854, 1855, 1856, 1857, 1858, 1859,
+          1860, 1861, 1862, 1863, 1864, 1865, 1866, 1867, 1868,
+          1869, 1870, 1871, 1872, 1873, 1874, 1875, 1876, 1877,
+          1878, 1879, 1880, 1881, 1882, 1883, 1884, 1885, 1886,
+          1887, 1888, 1889, 1890, 1891, 1892, 1893, 1894, 1895, 
+          1896, 1897, 1898, 1899, 
+1900, 1901, 1902, 1903, 1904, 1905, 1906, 1907, 1908, 1909, 1910, 
+1911, 1912, 1913, 1914, 1915, 1916, 1917, 1918, 1919, 1920, 1921, 
+1922, 1923, 1924, 1925, 1926, 1927, 1928, 1929, 1930, 1931, 1932, 
+1933, 1934, 1935, 1936, 1937, 1938, 1939, 1940, 1941, 1942, 1943, 
+1944, 1945, 1946, 1947, 1948, 1949, 1950, 1951, 1952, 1953, 1954, 
+1955, 1956, 1957, 1958, 1959, 1960, 1961, 1962)
+
+
+Count <- c(4, 5, 4, 1, 0, 4, 3, 4, 0, 6, 3, 3, 4, 0, 2, 6, 3, 3, 5, 4, 5, 3, 
+1, 4, 4, 1, 5, 5, 3, 4, 2, 5, 2, 2, 3, 4, 2, 1, 3, 2, 2, 1, 1, 
+1, 1, 3, 0, 0, 1, 0, 1, 1, 0, 0, 3, 1, 0, 3, 2, 2, 0, 1, 1, 1, 
+0, 1, 0, 1, 0, 0, 0, 2, 1, 0, 0, 0, 1, 1, 0, 2, 3, 3, 1, 1, 2, 
+1, 1, 1, 1, 2, 4, 2, 0, 0, 0, 1, 4, 0, 0, 0, 1, 0, 0, 0, 0, 0, 
+1, 0, 0, 1, 0, 1)
+
+datos <- list(Year = Year,
+              Count = Count)
+  
+iniciales <- function(){list(beta0 = rnorm(1), beta1 = rnorm(1))}
+
+parametros <- c("beta0", "beta1")
+```
+
+    Una vez disponemos de los argumentos llamamos a JAGS para llevar a cabo la simulación:
+
+```{r}
+set.seed(1)
+
+resul.accidentes <- jagsUI::jags(data=datos, inits= iniciales, parameters = parametros,
+                          model.file = "accidentes.jags", n.chains = 3, 
+                          n.iter=10000, n.burnin = 1000, n.thin=15)
+
+resul.accidentes 
+```
 
 3.  Valora la convergencia de la simulación utilizando la función
     `traceplot`.
+
+```{r}
+traceplot(resul.accidentes)
+```
 
 4.  Interpreta los resultados obtenidos, fundamentalmente en relación al
     efecto del tiempo sobre el número de accidentes ¿De qué forma te
