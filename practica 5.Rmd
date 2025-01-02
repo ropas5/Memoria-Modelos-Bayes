@@ -157,11 +157,11 @@ plot(resul.pois)
 ```{r}
 cat(
 "model{
-  # verosimilitud
-    for ( i in 1:length(JUNTAS_ROTAS)){
-      JUNTAS_ROTAS[i] ~ dbin(p[i], 6)
-      logit(p[i]) <- beta0 + beta1*TEMPERATURAS[i] 
-    }
+  # Definimos la verosimilitud
+  for (i in 1:length(JUNTAS_ROTAS)) {
+    JUNTAS_ROTAS[i] ~ dpois(lambda[i])
+    log(lambda[i]) <- beta0 + beta1 * TEMPERATURAS[i]
+  }
     
   # a priori
   beta0 ~dnorm(0,0.0001)
@@ -252,7 +252,8 @@ Year <- c(1851, 1852, 1853, 1854, 1855, 1856, 1857, 1858, 1859,
 1933, 1934, 1935, 1936, 1937, 1938, 1939, 1940, 1941, 1942, 1943, 
 1944, 1945, 1946, 1947, 1948, 1949, 1950, 1951, 1952, 1953, 1954, 
 1955, 1956, 1957, 1958, 1959, 1960, 1961, 1962)
-Year <- Year - mean(Year)
+media_anyo <- mean(Year)
+Year <- Year - media_anyo
 
 Count <- c(4, 5, 4, 1, 0, 4, 3, 4, 0, 6, 3, 3, 4, 0, 2, 6, 3, 3, 5, 4, 5, 3, 
 1, 4, 4, 1, 5, 5, 3, 4, 2, 5, 2, 2, 3, 4, 2, 1, 3, 2, 2, 1, 1, 
@@ -274,18 +275,18 @@ parametros <- c("beta0", "beta1")
 ```{r}
 set.seed(1)
 
-resul.accidentes <- jagsUI::jags(data=datos, inits= iniciales, parameters = parametros,
+resul.pois3 <- jagsUI::jags(data=datos, inits= iniciales, parameters = parametros,
                           model.file = "accidentes.jags", n.chains = 3, 
                           n.iter=10000, n.burnin = 1000, n.thin=15)
 
-resul.accidentes 
+resul.pois3 
 ```
 
 3.  Valora la convergencia de la simulación utilizando la función
     `traceplot`.
 
 ```{r}
-traceplot(resul.accidentes)
+traceplot(resul.pois3)
 ```
 
 4.  Interpreta los resultados obtenidos, fundamentalmente en relación al
@@ -294,8 +295,50 @@ traceplot(resul.accidentes)
     dicha relación significativa? Da (e interpreta) un intervalo de
     credibilidad al $95\%$ para el parámetro que controla dicha
     relación.
+    
+    
+    Primero calculamos el intervalo de credibilidad al $95\%$
+```{r}
+summary(resul.pois3)
+```
+    El intervalo de credibilidad al 95% de $\beta_1$ es [-0.02354788, -0.01394777] lo que significa que no incluye el valor 0. Por lo tanto, la relación entre los años y el número de accidentes es estadísticamente significativa. Como $\beta_1 < 0$ esto significa que conforme aumentan los años se espera que el nuemro de accidentes baje.
 
 5.  Genera una muestra de la distribución predictiva del número de
     accidentes predichos al año siguiente de concluir el estudio ¿Que
     probabilidad encuentras de que no haya ningún accidente ese año? ¿y
     $2$ o más?
+    
+    El modelo predictivo seria el siguiente:
+    $$
+    \lambda_{k+1}=e^{\beta_0 + \beta_1 Year_{k+1}}
+    $$
+    $$
+    Prediccio ~ Po(\lambda_{k+1})
+    $$
+    
+    
+```{r}
+nuevo_anyo <- 1963 - media_anyo #al anño que queremos calcular le restamos la media para adecuar los datos conforme se ha entrenado al modelo
+
+beta0 <- 0.355
+  
+beta1 <- -0.019
+  
+lambda_predict <- exp(beta0 + beta1*nuevo_anyo)
+  
+  
+numero_accidentes <- rpois(1, lambda = lambda_predict)
+numero_accidentes
+
+```
+Calculamos la probabilidad de que no haya accidentes 
+$P(Count = 0)$
+```{r}
+dpois(0,lambda = lambda_predict)
+```
+
+Calculamos la probabilidad de que haya mas de 2 accidentes
+$P(Count\ge 2) = 1- P(Count = 0)+ P(Count = 1)$
+```{r}
+1 - dpois(0,lambda = lambda_predict) + dpois(1,lambda = lambda_predict)
+```
