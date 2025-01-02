@@ -1,0 +1,306 @@
+---
+title: "Practica 3 - Modelos Bayesianos"
+author: "Iker Cuadros Ruiz"
+date: "2024-10-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(extraDistr)
+
+# install.packages("modeest")
+library(modeest) # Para calcular la moda
+
+```
+## Práctica 3
+
+### Actividad 1:
+
+Para cada una de las situaciones que se describen a continuación construye un modelo probabilístico apropiado, enumerando: la variable de interés, su distribución de probabilidad
+correspondiente, los datos, el parámetro de interés y los valores posibles posibles que puede
+tomar.
+
+**Escenario 1:** Estimación de la altura media de los alumnos de la ETSE
+
+Se pretende estimar la altura media de los alumnos de la ETSE, con ese objetivo recogimos la
+altura de cada uno de los alumnos de un grupo de prácticas de Modelos Bayesianos. Dichas
+alturas son: (168, 174, 182, 167, 168, 155, 154, 164, 154, 160, 176, 165, 149, 160, 177, 150,
+179, 174). Asumiremos la desviación típica de las alturas de los alumnos de la ETSE como
+un valor conocido e igual a 10 unidades.
+
+- Variable de Interés: $X$ -> Altura, en cm, de los alumnos de la ETSE
+
+- Distribución de Probabilidad: $X \sim N(\mu, \sigma^2 = 10^2)$
+
+- Datos: listado comn 18 alturas (168, 174, 182, 167, 168, 155, 154, 164, 154, 160, 176, 165, 149, 160, 177, 150, 179, 174)
+
+- Parámetro de Interés: $\mu$ (media de alturas, en cm, de los alumnos de la ETSE)
+
+- Valores posibles que puede tomar: $\mu \in R^+$
+
+**Escenario 2:** Estimación del número medio de palabras en una página de Game
+of Thrones
+
+Estamos interesados en estimar el número medio de palabras por página del libro Game of
+Thrones. Para ello se toma una muestra aleatoria de 10 páginas del libro donde se observan
+los siguientes números de palabras por página: (103, 94, 96, 95, 103, 116, 97, 87, 114, 101,
+90, 96, 83, 72).
+
+- Variable de Interés: $Y$ -> Número de palabras por página
+
+- Distribución de Probabilidad: $Y \sim Poisson(\lambda)$
+
+- Datos: Muestra aleatoria de 14 páginas donde se observan
+los siguientes números de palabras por página (103, 94, 96, 95, 103, 116, 97, 87, 114, 101,
+90, 96, 83, 72).
+
+- Parámetro de Interés: $\lambda$ (media de palabras por página)
+
+- Valores posibles que puede tomar: $\lambda \in N^+$
+
+**Escenario 3:** Estimación de la frecuencia de paso de la línea 63 por el Campus
+de Burjassot
+
+Queremos estudiar la frecuencia de paso de los autobuses de la línea 63 por el campus de
+Burjassot. Para ello se recoge el tiempo entre llegadas de los autobuses a la parada situada
+frente al campus. Dichos tiempos en minutos son: (15.7, 16.9, 22.8, 12.1, 36.1, 22.5, 12.9,
+14.6, 26.2, 15.6). Asumiremos que los tiempos de llegada son completamente independientes
+entre sí, por lo que la distribución de tiempos entre llegadas se adecúa a una distribución
+exponencial
+
+- Variable de Interés: $Z$ -> Tiempo entre llegadas de los autobuses
+
+- Distribución de Probabilidad: $Z \sim Exp(\lambda)$
+
+- Datos: Tiempo entre llegadas de los autobuses a la parada situada
+frente al campus. (15.7, 16.9, 22.8, 12.1, 36.1, 22.5, 12.9,
+14.6, 26.2, 15.6)
+
+- Parámetro de Interés: $\frac{1}{\lambda}$ (media de tiempo entre llegadas de los autobuses)
+
+- Valores posibles que puede tomar: $[0, +\infty)$
+
+### Actividad 2:
+
+Volviendo al escenario 1 de los descritos en la actividad anterior, y haciendo uso del formulario de estadística bayesiana que tenéis disponible en el aula virtual resuelve las siguientes
+cuestiones:
+
+**1.-** Plantea una distribución previa conjugada para la altura media de los alumnos de la
+ETSE que asuma que dicha altura está en torno a 170 cm, con una desviación típica
+de 2 cm, y obtén la distribución a posteriori correspondiente.
+
+*Hecho en las hojas*
+
+**2.-** Representa las distribuciones a priori y a posteriori de la altura media de los alumnos
+de la ETSE obtenidas en el apartado anterior.
+
+```{r}
+mu.prio <- 170
+sd.prio <- 2
+
+mu.post <- 7226/43
+sd.post <- sqrt(100/43)
+
+x <- seq(155, 195, length.out = 100) # Valores de x
+
+# Calculamos las dist. a priori y a posteriori
+dist.priori <- dnorm(x, mean = mu.prio, sd = sd.prio)  # Densidad normal estándar
+dist.posteriori <- dnorm(x, mean = mu.post, sd = sd.post)
+
+plot(x, dist.priori, type = "l", col = "blue", lwd = 2, 
+     main = "Densidad de la distribución normal",
+     xlab = "x", ylab = "f(x)",
+          ylim = c(0, 0.4))
+lines(x, dist.posteriori, col = 'green', lwd = 2)
+
+legend("topright", legend = c("Distribución a priori", "Distribución a posteriori"),
+       col = c("blue", "green"), lwd = 2)
+
+```
+
+**3.-** Describe la distribución a posteriori:
+
+- mediante estimaciones puntuales tales como la media a posteriori, la moda a posteriori
+y la mediana a posteriori;
+
+```{r}
+
+# Genero valores de la distribución a posteriori
+datos.posteriori <- rnorm(500, mean = mu.post, sd = sd.post)
+
+media <- mean(datos.posteriori)
+moda <- mlv(datos.posteriori, method = 'kernel') # 'kernel' porque son datos continuos, sino 'mfv'
+mediana <- median(datos.posteriori)
+
+print(paste('La media es: ', media))
+print(paste('La moda es: ', moda))
+print(paste('La mediana es: ', mediana))
+
+```
+
+- mediante un intervalo creíble del 95 % para la altura media
+
+```{r}
+
+# Calculamos los cuantiles al 2.5% y 97.5%
+q025 <- qnorm(0.025, mean = mu.post, sd = sd.post)
+q975 <- qnorm(0.975, mean = mu.post, sd = sd.post)
+
+print(paste('El Intervalo de Credibilidad al 95% es: [', q025, ':', q975 ,']'))
+```
+
+**4.-** Contrasta si la estatura media de los alumnos de la ETSE es inferior a 165 cm, la altura
+media de los alumnos de la UV. Muestra ambas probabilidades posteriores utilizadas
+en el contraste en una figura.
+
+$H_0: \mu \lt 165$
+$H_a: \mu \ge 165$
+
+```{r}
+prob_post <- pnorm(165, mean = mu.post, sd = sd.post)
+prob_post
+```
+
+$P(\mu \lt 165 | datos) = 0.0235$ 
+
+Se rechaza la hipótesis nula
+
+**5.-** Obtén la distribución de la altura de un nuevo alumno cualquiera de la ETSE, tanto
+antes como después de haber observado los datos.
+
+Antes de haber observado los datos lo que se debe hacer es comprobar su distribución predictiva a priori.
+
+La distribución predictiva a priori para una normal de la cual se conoce su varianza es la siguiente:
+
+$$x^* \sim  N(\nu, \sigma^2 + \tau^2)$$
+$$x^* \sim  N(170, 10^2 + 2^2)$$
+$$x^* \sim  N(\mu=170, \sigma^2=104)$$
+
+```{r}
+
+mu.pred.prio <- 170
+sd.pred.prio <- sqrt(104)
+
+x <- seq(100, 250, length.out = 1000)
+
+dist.pred.priori <- dnorm(x, mean = mu.pred.prio, sd = sd.pred.prio)  
+
+plot(x, dist.pred.priori, type = "l", col = "blue", lwd = 2, 
+     main = "Densidad de la distribución predictiva a priori",
+     xlab = "x", ylab = "f(x)")
+
+```
+
+Si tenemos en cuenta los datos observados, entonces se utilizará la distribución predictiva a posteriori.
+
+La distribución predictiva a posteriori para una normal de la cual se conoce su varianza es la siguiente:
+
+$$x^*| \textbf{x} \sim  N(w \cdot \nu + (1-w) \cdot \bar{x}, \sigma^2 + \frac{\sigma^2}{n} \cdot (1-w)), \space Donde \space w=\frac{\frac{\sigma^2}{n}}{\frac{\sigma^2}{n}+\tau^2} $$
+
+```{r}
+# Calculamos w, mu.pred.post, sd.pred.post
+w <- (10^2/18)/((10^2/18)+2^2)
+
+mu.pred.post <- w*170+(1-w)*mean(datos.alumnos.etse)
+sd.pred.post <- sqrt(10^2+(10^2/18)*(1-w))
+
+x <- seq(100, 250, length.out = 1000)
+
+dist.pred.posteriori <- dnorm(x, mean = mu.pred.post, sd = sd.pred.post) 
+
+plot(x, dist.pred.priori, type = "l", col = "blue", lwd = 2, 
+     main = "Densidad de la distribución predictiva a priori",
+     xlab = "x", ylab = "f(x)",
+     ylim = c(0,0.06))
+lines(x, dist.pred.posteriori, col = 'green', lwd = 2)
+
+legend("topright", legend = c("Distribución predictiva a priori", "Distribución predictiva a posteriori"),
+       col = c("blue", "green"), lwd = 2)
+
+```
+
+**6.-** ¿Cuál es la probabilidad a priori de que la altura de este nuevo alumno sea superior a
+180 cm? ¿Y la a posteriori?
+
+```{r}
+# Probabilitat P(mu < 180) per a priori
+pred_prob_pri <- 1 - pnorm(180, mean = mu.pred.prio, sd = sd.pred.prio)
+pred_prob_pri
+
+# Probabilitat P(mu < 180) per a posteriori
+pred_prob_post <- 1 - pnorm(180, mean = mu.pred.post, sd = sd.pred.post)
+pred_prob_post
+```
+Se aceptan las hipótesis nulas
+
+### Actividad 3:
+
+Volviendo al escenario 3 de los descritos en la actividad anterior, y haciendo uso del formulario de estadística bayesiana que tenéis disponible en el aula virtual resuelve las siguientes
+cuestiones:
+
+```{r}
+datos.iniciales <- c(15.7, 16.9, 22.8, 12.1, 36.1, 22.5, 12.9, 14.6, 26.2, 15.6)
+n <- length(datos.iniciales)
+n
+```
+
+**1.-** La EMT informa que la frecuencia de paso de los autobuses es de 15 minutos, por tanto
+debería llegar 1/15 autobuses por minuto. Plantea una distribución previa conjugada
+para el parámetro de la distribución exponencial (número de llegadas a la parada por
+minuto) acorde a esta información y con desviación típica de 0.05 unidades.
+
+!!! Pasar a latex ejercicio en la hoja
+
+```{r}
+a.priori <- 16/9
+b.priori <- 80/3
+
+x <- seq(0, 1, length.out = 1000)
+dist.priori <- dgamma(x, shape = a.priori, rate = b.priori)
+plot(x, dist.priori, type = "l", col = "blue", lwd = 2, 
+     main = "Densidad de la Gamma a priori",
+     xlab = "x", ylab = "f(x)")
+```
+
+**2.-** Calcula la distribución a posteriori correspondiente a esta prior y resume dicha distribución mediante su media, moda y mediana a posteriori, así como un intervalo de credibilidad a posteriori del 95 %. Representa toda la información que has calculado.
+
+!!! Pasar a latex ejercicio en la hoja
+
+```{r}
+a.posteriori <- n+a.priori
+b.posteriori <- sum(datos.iniciales)+b.priori
+
+x <- seq(0, 1, length.out = 1000)
+dist.posteriori <- dgamma(x, shape = a.posteriori, rate = b.posteriori)
+plot(x, dist.priori, type = "l", col = "blue", lwd = 2, 
+     main = "Densidad de la Gamma a posteriori",
+     xlab = "x", ylab = "f(x)",
+     ylim=c(0,30))
+lines(x, dist.posteriori, col = 'green', lwd = 2)
+
+legend("topright", legend = c("Distribución predictiva a priori", "Distribución predictiva a posteriori"),
+       col = c("blue", "green"), lwd = 2)
+```
+
+[Por hacer]
+Calcular:
+- Media de una gamma (0.053)
+- Moda de una gamma (0.049)
+- Mediana de una gamma (qgamma(0.5...)=0.052)
+- Intervalo de credibilidad al 95%
+
+**3.-** Según comentábamos, la EMT anuncia una tasa de llegada de 1/15 autobuses por
+minuto para el tramo horario en el que se han tomado las mediciones. Contrasta la
+hipótesis de que la tasa real de llegadas es menor que lo anunciado por la EMT.
+
+$$
+H_{0}: \lambda \ge 1/15 \\
+H_{A}: \lambda \lt 1/15
+$$
+
+[Por hacer]
+Calcular la probabilidad y ya está

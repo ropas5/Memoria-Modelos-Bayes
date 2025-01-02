@@ -1,0 +1,192 @@
+---
+title: "Practica 5 - Modelos Bayesianos"
+author: "Iker Cuadros Ruiz y Roger Pastor Juan"
+date: "2024-10-24"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(extraDistr)
+
+if (!require(modeest)) install.packages("modeest")
+library(modeest) # Para calcular la moda
+
+if (!require(LaplacesDemon)) install.packages("LaplacesDemon")
+library(LaplacesDemon)
+
+if (!require(MASS)) install.packages("MASS")
+library(MASS)
+
+if (!require(metRology)) install.packages("metRology")
+library(metRology)
+
+if (!require(jagsUI)) install.packages("jagsUI")
+library(jagsUI)
+
+if (!require(faraway)) install.packages("faraway")
+library(faraway)
+```
+
+## PRÁCTICA 6: MODELIZACIÓN BAYESIANA AVANZADA
+
+### Actividad 1: Diferencias entre operarios
+
+A la hora de validar el funcionamiento de una máquina muchas veces se
+plantea si se producen diferencias según el operario que está a su
+cargo. El banco de datos `pulp` de la librería `faraway` estudia este
+efecto, concretamente, contiene información sobre el brillo del papel
+producido por una máquina en función del operario que la ha manejado.
+
+Plantea un modelo lineal para la variable respuesta brillo del papel, en
+el que el operario sea modelizado con un efecto aleatorio para valorar
+la variabilidad atribuible a este factor. Utiliza *JAGS* para llevar a
+cabo la inferencia sobre el modelo propuesto. Utiliza los estadísticos
+proporcionados por *JAGS* para valorar la convergencia de la simulación
+¿Encuentras que la principal fuente de variabilidad en el brillo de los
+papeles es atribuible a cada papel en concreto o al operario que
+manejaba la máquina?
+
+```{r}
+data <- pulp
+data
+
+brillo <- pulp$bright
+operario <- as.numeric(factor(pulp$operator))
+```
+
+```{r}
+cat(
+'model{
+  # Definimos la verosimilutud
+  for (i in 1:length(DATOS_BRILLO)) {
+    DATOS_BRILLO[i] ~ dnorm(mu[i], tau)
+    mu[i] <- beta0 + beta1[OPERARIO[i]]
+  }
+  
+  # A priori
+  tau <- sigma^(-2)
+  sigma ~ dunif(0, 100)
+  
+  beta0 ~ dnorm(0, 0.001)
+  for (j in 1:4) {
+    beta1[j] ~ dnorm(0, tauOp)
+  }
+  tauOp <- sigmaOp^(-2)
+  sigmaOp ~ dunif(0, 100)
+
+}'
+, file = './modelos_jags/modelo1')
+```
+
+```{r}
+datos <- list(DATOS_BRILLO = brillo, OPERARIO = operario)
+
+iniciales <- function() {list(beta0 = rnorm(1), beta1 = rnorm(4), # Generamos 4 valores, 1 por operario
+                              sigma = runif(1, 0, 100), sigmaOp = runif(1, 0, 100))}
+
+parametros <- c('beta0', 'beta1', 'sigma', 'sigmaOp')
+
+resul.brillo <- jagsUI::jags(data = datos, inits = iniciales, parameters.to.save = parametros,
+                             model.file = './modelos_jags/modelo1', 
+                             n.iter = 5000, n.burnin = 1000, n.chains = 3, n.thin = 12)
+resul.brillo
+```
+
+## Actividad 2:
+
+Los siguientes datos corresponden al número de fallos de distintas bombas hidráulicas junto
+con el tiempo de funcionamiento de cada una de ellas (en miles de horas):
+
+```{r}
+fallos <- c(5, 1, 5, 14, 3, 19, 1, 1, 4, 22)
+tiempo <- c(94.5, 15.7, 62.9, 126, 5.24, 31.4, 1.05, 1.05, 2.1, 10.5)
+```
+
+Nuestro objetivo será modelizar el número de fallos ocurridos por cada 1000 horas de uso,
+pero cuidado, no tiene sentido modelizar dicho número directamente ya que si una máquina
+ha funcionado más tiempo debería tener más fallos ¿no? Así pues, modelizaremos el número
+de fallos asumiendo que su valor esperado es proporcional al tiempo de funcionamiento de
+la máquina. Estos pasos te ayudarán en el proceso:
+
+1. Formula un modelo que estudie el número de fallos de las bombas en función de su tiempo de uso, por cada 1000 horas. Utiliza JAGS para hacer inferencia y los estadísticos
+proporcionados para valorar la convergencia
+
+```{r}
+cat(
+'model{
+  # Definimos la verosimilutud
+  for (i in 1:length(DATOS_FALLOS)) {
+    DATOS_FALLOS[i] ~ dpois(lambda*TIEMPO[i])
+  }
+  
+  # A priori
+  lambda ~ dunif(0, 1000)
+  #lambda ~ dgamma(0.1, 0.1)
+}'
+, file = './modelos_jags/modelo2')
+```
+
+```{r}
+datos <- list(DATOS_FALLOS = fallos, TIEMPO = tiempo)
+
+iniciales <- function() {list(lambda = rgamma(1,0.1,0.1))}
+
+parametros <- c('lambda')
+
+resul.fallos1 <- jagsUI::jags(data = datos, inits = iniciales, parameters.to.save = parametros,
+                             model.file = './modelos_jags/modelo2', 
+                             n.iter = 5000, n.burnin = 1000, n.chains = 3, n.thin = 12)
+resul.fallos1
+```
+
+*Dado que no tenemos información inicial, utiliza para $\lambda$ la previa de Jeffreys del parámetro
+de la distribución de Poisson*
+
+2. Una vez ajustado el modelo anterior nos planteamos que la tasa de fallos, por 1000
+horas de uso, podría variar de máquina a máquina. En realidad se dispone de más
+máquinas, aunque solo conocemos datos de éstas (siendo nuestro interés el cuantificar la
+variabilidad entre máquinas). Modeliza esta nueva situación con un modelo jerárquico
+(bayesiano) haciendo uso de JAGS, y sus estadísticos para valorar la convergencia
+de la simulación ¿Qué modelo de los que has ajustado te parece más oportuno en
+base al ajuste obtenido? ¿Encuentras diferencias entre máquinas según los intervalos
+de credibilidad de cada una de las máquinas que has estudiado?
+
+```{r}
+cat(
+'model{
+  # Definimos la verosimilutud
+  for (i in 1:length(DATOS_FALLOS)) {
+    DATOS_FALLOS[i] ~ dpois(lambda[i]*TIEMPO[i])
+  }
+  
+  # A priori
+  for (i in 1:10) {
+    lambda[i] ~ dgamma(alpha, beta)
+  }
+  
+  alpha ~ dexp(0.01)
+  beta ~ dexp(0.01)
+}'
+, file = './modelos_jags/modelo3')
+```
+
+```{r}
+datos <- list(DATOS_FALLOS = fallos, TIEMPO = tiempo)
+
+iniciales <- function() {list(lambda = rgamma(10,0.1,0.1), alpha=rexp(1, 0.01), beta=rexp(1, 0.01))}
+
+parametros <- c('lambda', 'alpha', 'beta')
+
+resul.fallos1 <- jagsUI::jags(data = datos, inits = iniciales, parameters.to.save = parametros,
+                             model.file = './modelos_jags/modelo3', 
+                             n.iter = 5000, n.burnin = 1000, n.chains = 3, n.thin = 12)
+resul.fallos1
+```
+

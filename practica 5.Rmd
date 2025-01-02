@@ -1,0 +1,193 @@
+---
+title: "Practica 5 - Modelos Bayesianos"
+author: "Iker Cuadros Ruiz y Roger Pastor Juan"
+date: "2024-10-24"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(extraDistr)
+
+if (!require(modeest)) install.packages("modeest")
+library(modeest) # Para calcular la moda
+
+if (!require(LaplacesDemon)) install.packages("LaplacesDemon")
+library(LaplacesDemon)
+
+if (!require(MASS)) install.packages("MASS")
+library(MASS)
+
+if (!require(metRology)) install.packages("metRology")
+library(metRology)
+
+if (!require(jagsUI)) install.packages("jagsUI")
+library(jagsUI)
+```
+
+## PRÁCTICA 5: SIMULACIÓN MCMC CON JAGS
+
+### Actividad 1: Regresión logística con JAGS
+
+En $1986$ tuvo lugar uno de los más trágicos accidentes de la era
+espacial al explotar nada más despegar el transbordador espacial
+Challenger. Por lo que se pudo analizar después, el accidente se podría
+haber evitado si se hubiera conocido la alta probabilidad de fallo de
+unas piezas clave que controlaban la presión cuando bajaba la
+temperatura. Los siguientes datos muestran las temperaturas (en grados
+Farenheit) que había en las $23$ ocasiones previas que había realizado
+un lanzamiento y para cada una de ellas se presenta también el número de
+juntas tóricas rotas (de $6$). Las juntas tóricas eran algo importante
+para regular la presión en el momento del lanzamiento.
+
+|                                |     |     |     |     |     |     |     |     |     |     |     |     |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| Temperatura                    | 66  | 70  | 69  | 68  | 67  | 72  | 73  | 70  | 57  | 63  | 70  | 78  |
+| Número de juntas tóricas rotas | 0   | 1   | 0   | 0   | 0   | 0   | 0   | 0   | 1   | 1   | 1   | 0   |
+
+|                                |     |     |     |     |     |     |     |     |     |     |     |
+|------|------|------|------|------|------|------|------|------|------|------|------|
+| Temperatura                    | 67  | 53  | 67  | 75  | 70  | 81  | 76  | 79  | 75  | 76  | 58  |
+| Número de juntas tóricas rotas | 0   | 2   | 0   | 0   | 0   | 0   | 0   | 0   | 2   | 0   | 1   |
+
+Tu objetivo será analizar este conjunto de datos utilizando **JAGS**
+para simular de la muestra a posteriori con MCMC.
+
+1.  Describe en detalle el modelo que te permite explicar el número de
+    juntas tóricas rotas a través de la probabilidad de fallo en función
+    de la temperatura. A la hora de asignar distribución inicial a los
+    parámetros del modelo piensa que **JAGS**, la herramienta de
+    simulación que vamos a utilizar, no permite el uso de distribuciones
+    impropias ¿Qué propuesta de distribución inicial te parece adecuada
+    para estos parámetros y válida en **JAGS**?
+    
+    Variable de respuesta: Número de juntas tóricas rotas
+    
+    Variable explicativa: Temperatura
+    
+    Como son conteos de juntas tóricas rotas sabemos que la variable de respuesta seguirá una distribución de Poisson y por tanto la regresión a aplicar será la de Poisson.
+    
+    Por tanto, el modelo podría adaptarse a lo siguiente:
+
+```{r}
+cat(
+"model {
+  
+  # Definimos la verosimilitud
+  for (i in 1:length(JUNTAS_ROTAS)) {
+    JUNTAS_ROTAS[i] ~ dpois(lambda[i])
+    log(lambda[i]) <- beta0 + beta1 * TEMPERATURAS[i]
+  }
+  
+  # A priori
+  beta0 ~ dnorm(0, 0.001)
+  beta1 ~ dnorm(0, 0.001)
+  
+}", file="./jags_models/poissonReg.jags")
+```
+
+Con el modelo ya definido, definimos los argumentos que nos valdrán para ejecutarlo:
+
+```{r}
+datos <- list(JUNTAS_ROTAS = c(0,1,0,0,0,0,0,0,1,1,1,0,0,2,0,0,0,0,0,0,2,0,1),
+              TEMPERATURAS = c(66,70,69,68,67,72,73,70,57,63,70,78,67,53,67,75,70,81,76,79,75,76,58))
+
+iniciales <- function(){list(beta0=rnorm(1), beta1=rnorm(1))}
+
+parametros <- c('beta0', 'beta1')
+```
+
+Una vez disponemos de los argumentos llamamos a JAGS para llevar a cabo la simulación:
+
+```{r}
+set.seed(1)
+
+resul.pois <- jagsUI::jags(data = datos, inits=iniciales, parameters.to.save=parametros,
+                           model.file = './jags_models/poissonReg.jags', 
+                           n.chains=5, n.iter=10000, n.burnin=1000, n.thin=15)
+
+resul.pois
+```
+
+2.  Utiliza **JAGS** para hacer inferencia sobre el modelo de regresión
+    logística que acabas de describir.
+
+3.  Valora la convergencia de la simulación utilizando la función
+    `traceplot`.
+
+```{r}
+traceplot(resul.pois)
+```
+
+Tal y como anticipan los valores de rhat y n.eff la convergencia parece buena.
+
+
+4.  Una vez simuladas las muestras de la distribución a posteriori de
+    ambos parámetros podemos utilizarlas para hacer inferencia.
+    Representa la estimación de la función de densidad de ambos
+    parámetros del modelo y resume de la manera que te parezca
+    conveniente su distribución a posteriori. Valora nuevamente si la
+    pendiente $\beta_{1}$ es mayor o menor que $0$ y qué implicación
+    tiene este resultado.
+
+```{r}
+plot(resul.pois)
+```
+
+5.  **JAGS** también puede ser utilizado para simular de distribuciones
+    predictivas. Por ejemplo, en el mismo modelo que has corrido
+    previamente, podrías añadir un par de líneas, una con la expresión
+    que calcula el valor de la probabilidad (o simplemente su logit)
+    para el valor que quieras predecir, y otra en la que generas el
+    valor que quieres predecir a partir de la probabilidad anterior.
+    Estima, utilizando **JAGS**, la distribución predictiva a posteriori
+    del número de juntas tóricas rotas a $28$ grados Fahrenheit ¿Qué
+    numero medio de juntas rotas esperarías encontrar en un cohete
+    lanzado a esa temperatura?
+    
+```{r}
+
+```
+    
+
+### Actividad 2: Modelización de conteos haciendo uso de JAGS
+
+El archivo `mining.Rdata` contiene el número anual de accidentes
+observados (vector `Count`) en minas de carbón de el Reino Unido durante
+el periodo $1851$-$1962$. Adicionalmente, el vector `Year`, contiene el
+año correspondiente a cada obseración del periodo de estudio. Esta
+última variable ha sido centrada (con valores
+$-55.5, -54.5, \dots , 55.5$) para evitar problemas de colinealidad con
+el intercept. El objetivo de esta tarea es estudiar la evolución del
+número de accidentes anuales como función del año del periodo de
+estudio, obviando la estructura de dependencia temporal que pudiera
+mostrar dicha serie.
+
+1.  Describe en detalle un modelo que te permita explicar el número de
+    accidentes anuales en minas británicas en función del año del
+    periodo de estudio. Ten en cuenta nuevamente la limitación de
+    **JAGS** en cuanto al uso de distribuciones impropias.
+
+2.  Utiliza **JAGS** para hacer inferencia sobre el modelo de regresión
+    que acabas de plantear.
+
+3.  Valora la convergencia de la simulación utilizando la función
+    `traceplot`.
+
+4.  Interpreta los resultados obtenidos, fundamentalmente en relación al
+    efecto del tiempo sobre el número de accidentes ¿De qué forma te
+    parece que influyen los años sobre el número de accidentes? ¿Es
+    dicha relación significativa? Da (e interpreta) un intervalo de
+    credibilidad al $95\%$ para el parámetro que controla dicha
+    relación.
+
+5.  Genera una muestra de la distribución predictiva del número de
+    accidentes predichos al año siguiente de concluir el estudio ¿Que
+    probabilidad encuentras de que no haya ningún accidente ese año? ¿y
+    $2$ o más?

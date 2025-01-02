@@ -1,0 +1,318 @@
+---
+title: "Practica 4 - Modelos Bayesianos"
+author: "Iker Cuadros Ruiz"
+date: "2024-10-24"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(extraDistr)
+
+if (!require(modeest)) install.packages("modeest")
+library(modeest) # Para calcular la moda
+
+if (!require(LaplacesDemon)) install.packages("LaplacesDemon")
+library(LaplacesDemon)
+
+if (!require(MASS)) install.packages("MASS")
+library(MASS)
+
+if (!require(metRology)) install.packages("metRology")
+library(metRology)
+```
+
+## Práctica 4: PRÁCTICA 4: INFERENCIA BASADA EN SIMULACIÓN EN MODELOS MÁS COMPLEJOS
+
+### Actividad 1: Inferencia haciendo uso de simulación en una población Normal con media y varianza desconocidas
+
+Se pretende estimar la altura media de los alumnos de la ETSE. Con ese
+objetivo se recoge la altura de cada uno de los alumnos de un grupo de
+prácticas de Modelos Bayesianos. Dichas alturas son: (168, 174, 182,
+167, 168, 155, 154, 164, 154, 160, 176, 165, 149, 160, 177, 150, 179,
+174). A diferencia de la práctica anterior supondremos que la desviación
+típica de las alturas de los alumnos de la ETSE es desconocida, ya que
+parece un supuesto bastante más realista que el que asumíamos allí.
+
+```{r}
+datos <-  c(168, 174, 182, 167, 168, 155, 154, 164, 154, 160, 176, 165, 149, 160, 177, 150, 179, 174)
+```
+
+**1.** Precisa los parámetros del modelo estadístico necesario para
+estudiar el problema propuesto. Plantea una previa no informativa para
+dichos parámetros y deduce la distribución a posteriori analítica
+correspondiente. ¿Dispones/conoces de herramientas en $R$ para
+representar/reproducir dicha distribución, calcular sus cuantiles o
+simular valores de ella?
+
+Utilizando el formulario plantearemos la siguiente previa no
+informativa:
+
+$$
+p(\mu, \sigma^{2}) \propto (\sigma^{2})^{-1}
+$$
+
+Además, la distribución a posteriori conjunta quedará de la siguiente
+forma:
+
+$$
+p( \mu, \sigma^{2} | \textbf{x} ) =
+\sigma^{-n-2} e^{- \frac{1}{2 \sigma^{2}} [(n-1)s^{2}+n(\bar{x}-\mu)^{2}]}
+$$
+
+No se dispone de muchos métodos con R para poder representar/reproducir
+la distribución o hacer otros cálculos varios ya que por un lado no
+poseemos las constante de integración necesarias para poder integrar y
+por otro lado las distribuciones obtenidas no se parecen a otras
+distribuciones de las conocidas.
+
+Uno de los principales problemas que se plantea en estudios de
+inferencia bayesiana con varios parámetros es que la distribución a
+posteriori correspondiente es multivariante y que difícilmente será una
+distribución multivariante conocida. En consecuencia, resulta difícil
+trabajar con dichas distribuciones, resumirlas, hacer
+cálculos/contrastes de manera analítica (mediante desarrollos
+matemáticos),... Vamos a ver cómo la simulación de muestras aleatorias
+de dichas distribuciones resulta un recurso utilísimo en este contexto.
+
+En nuestro caso concreto, dado que $P(\mu, \sigma^{2} | \textbf{x})$
+sigue una distribución no estándar, nos vamos a conformar con obtener
+una “simple” muestra aleatoria de valores de
+$\mu, \sigma^{2} | \textbf{x}$. Como el muestrear de ambos valores
+conjuntamente puede ser complicado, nos planteamos simular una muestra
+$\sigma_{1},..., \sigma_{n}$ de $\sigma^{2} | \textbf{x}$ y una vez
+obtenida esta muestra simularemos otra ${\mu_{1},..., \mu_{n}}$ de
+$\mu | \sigma^{2}, \textbf{x}$ ya que en el formulario de estadística
+bayesiana de la asignatura se nos dan ambas distribuciones y son
+relativamente manejables. La unión de ambas muestras
+{$(\sigma_{1}, \mu_{1}),...,(\sigma_{n}, \mu_{n})$} $=$
+{$(\sigma, \mu)_{1},...,(\sigma, \mu)_{n}$} supone una muestra de la
+distribución conjunta de $(\mu, \sigma^{2}) | \textbf{x}$. Veamos cómo
+se aplica todo esto en la práctica.
+
+**2.** Según se refleja en el formulario,
+$\sigma^{2} | \textbf{x} \sim inv-\chi^{2} (n-1, s^{2})$ sigue una
+distribución chi-cuadrado invertida con $n − 1$ grados de libertad y con
+parámetro de escala $s^{2}$. Utiliza la librería `LaplacesDemon`
+(funciones `dinvchisq`, `rinvchisq`) para visualizar la distribución a
+posteriori $\sigma^{2} | \textbf{x}$ que corresponde a nuestro estudio.
+Obtén una muestra de 10,000 valores aleatorios de dicha distribución y
+representa su histograma con la función de densidad correspondiente
+superpuesta.
+
+```{r}
+n <- length(datos)
+
+nu <- n-1
+tau <- (1/(n-1))*sum((datos-mean(datos))^2)
+
+set.seed(1)
+datos.rinvchisq <- rinvchisq(10000, df = nu, scale = tau)
+hist(datos.rinvchisq, 
+     probability = TRUE, 
+     breaks = 100, 
+     col = "lightblue")
+curve(dinvchisq(x, nu, tau), 
+      from = 0.001, 
+      to = max(datos.rinvchisq), 
+      col = "darkblue", 
+      lwd = 2, 
+      add = TRUE)
+```
+
+**3.** El paquete `LaplacesDemon` no contiene ninguna función
+`qinvchisq` que nos pudiera ser de utilidad para obtener los cuantiles
+de $\sigma^{2} | \textbf{x}$, y de ahí calcular, por ejemplo, su mediana
+o intervalos de credibilidad a posteriori al $95\%$. Sin embargo, la
+muestra aleatoria que has obtenido en el apartado anterior nos puede
+valer para aproximar dichos valores. ¿De qué forma? Obtén la mediana e
+intervalo de credibilidad al $95\%$ de $\sigma^{2} | \textbf{x}$.
+
+```{r}
+# Cálculo de la mediana
+mediana <- median(datos.rinvchisq)
+
+# Cálculo del intervalo de confianza
+q025 <- quantile(datos.rinvchisq, probs = 0.025)
+q975 <- quantile(datos.rinvchisq, probs = 0.975)
+
+print(paste0('Mediana: ', mediana))
+print(paste0('Intervalo de credibilidad al 95%: [', q025, ':', q975, ']'))
+```
+
+El formulario de la asignatura nos dice que
+$\mu | \sigma^{2}, \textbf{x} \sim N(\bar{x}, \frac{\sigma^{2}}{n})$, es
+decir, dado cualquier valor de $\sigma^{2}$ conoceríamos la distribución
+a posteriori de $\mu$ correspondiente. El problema es que no conocemos
+un valor concreto de $\sigma^{2}$ sino su distribución. Sin embargo,
+conocemos un montón de valores $\sigma_{1}^{2},...,\sigma_{10000}^{2}$
+que hemos generado en la muestra aleatoria del ejercicio anterior y a
+partir de cada uno de estos valores podríamos generar un valor simulado
+de dicha distribución normal, en concreto,
+$\mu_{i} \sim N\left(\bar{x}, \frac{\sigma_{i}^{2}}{n}\right)$,
+consiguiendo así una muestra $\mu_{1},...,\mu_{10000}$. Este método de
+simulación se conoce como *simulación por composición* y como resultado
+obtendremos una muestra aleatoria de $\mu | \sigma^{2}, \textbf{x}$.
+Además, tal y como hemos comentado, cada uno de los pares de valores
+{$\left(\mu_{i}, \sigma_{i}^{2}\right), \space i=1,...$} generados
+siguen la distribución multivariante
+$\left(\mu, \sigma^{2}\right) | \textbf{x}$ que nos resulta tan difícil
+de manejar matemáticamente.
+
+**4.** Empleando simulación por composición, obtén una muestra de la
+distribución a posteriori conjunta
+$\left( \mu, \sigma^{2} \right) | \textbf{x}$. Estima la función de
+densidad bivariante correspondiente mediante la función `MASS::kde2d`
+(`kde2d` estima la función de densidad sobre un grid de valores para
+$\mu$ y $\sigma^{2}$ y representa dicha estimación con la función
+`image`
+
+```{r}
+n <- length(datos)
+mu <- mean(datos)
+sigma2 <- datos.rinvchisq/n
+sigma <- sqrt(sigma2)
+
+datos.mu <- rnorm(10000, mean = mu, sd = sigma)
+hist(datos.mu, 
+     probability = TRUE, 
+     breaks = 30, 
+     col = "lightblue")
+```
+
+Ahora teniendo valores para $\sigma^{2}$ y $\mu$ sacaremos los
+siguientes valores:
+{$\left(\mu_{i}, \sigma_{i}^{2}\right), \space i=1,...$}.
+
+Por tanto, con estos datos podemos definir la distribución a posteriori
+conjunta $\left( \mu, \sigma^{2} \right) | \textbf{x}$
+
+```{r}
+# Estimación de densidad conjunta
+kde <- kde2d(datos.mu, datos.rinvchisq, n=100)
+
+# Mostramos graficamente el análisis de la densidad
+image(kde, col = terrain.colors(100), 
+      xlab = expression(mu), ylab = expression(sigma^2), 
+      main = "Densidad conjunta posterior de (mu, sigma^2)")
+contour(kde, add = TRUE)
+
+```
+
+**5.** El procedimiento anterior, si ignoramos la muestra generada para
+$\sigma^{2}$, genera implícitamente una muestra de valores para $\mu$.
+Dicha muestra de valores es a su vez una muestra de la distribución
+marginal a posteriori $\mu | \textbf{x}$. En el formulario de la
+asignatura se nos informa que
+$P(\mu |\textbf{x}) \sim t_{n-1} \left( \bar{x}, \frac{s^{2}}{n} \right)$,
+comprueba que la muestra que has generado corresponde a dicha
+distribución haciendo un histograma de la muestra de $\mu$ que has
+generado ya y superponiendo la función de densidad correspondiente que
+aparece en el formulario (utiliza la función `dt.scaled` de la librería
+`metRology` ya que `dt` no permite incluir el parámetro de escala
+$\frac{s^{2}}{n}$.
+
+```{r}
+n <- length(datos)
+
+media <- mean(datos)
+escala <- ((1/(n-1))*sum((datos-mean(datos))^2))/n
+escala_param <- sqrt(escala)
+
+hist(datos.mu, 
+     probability = TRUE, 
+     breaks = 50, 
+     col = "lightblue")
+curve(dt.scaled(x, mean=media, sd=escala_param, df=n-1),
+      col = "darkblue", lwd = 2, add = TRUE)
+```
+
+Una de las grandes ventajas de la inferencia basada en simulación es que
+si $x_{1},...,x_{n}$ es una muestra de la variable aleatoria $X$
+entonces $f(x_{1}),...,f(x_{n})$ será, de la misma forma, una muestra de
+la variable aleatoria $f(X)$. Así, podremos utilizar esta segunda
+muestra para hacer inferencia sobre $f(X)$ (sin desarrollos matemáticos
+de por medio) de la misma manera que utilizábamos la primera para hacer
+inferencia sobre $X$. De manera similar, si
+$(x_{1}, y_{1}),...,(x_{n}, y_{n})$ fuera una muestra del vector de
+variables $(X, Y)$ entonces $g(x_{1}, y_{1}),..., g(x_{n}, y_{n})$ sería
+una muestra de aleatoria de la variable $g(X,Y)$
+
+**6.** A partir de las muestras de variables de que dispones estima, y
+representa, la distribución a posteriori de la desviación típica
+$\sigma$ de las alturas de los alumnos de la ETSE. Representa la
+estimación de la función de densidad obtenida haciendo uso de la función
+`density`.
+
+Si la muestra que tengo se refiere a $\sigma^{2}$ entonces primeramente
+transformo las variables a desviaciones estandard $\sigma$.
+
+```{r}
+datos.sd <- sqrt(datos.rinvchisq)
+density_sigma <- density(datos.sd)
+plot(density_sigma, main="Distribución posterior de sigma", xlab="Desviación estándar (sigma)")
+
+```
+
+**7.** A partir de las muestras de las variables de que dispones estima
+la media a posteriori y da un intervalo de credibilidad (a posteriori)
+al $95\%$ del coeficiente de variación ($\frac{\sigma}{\mu}$) de las
+alturas de los alumnos de la ETSE.
+
+A continuación, sacamos la media a posteriori para $\mu$ y $\sigma^{2}$:
+
+-   Para $\mu$:
+
+```{r}
+media.mu <- mean(datos.mu)
+media.mu
+```
+
+-   Para $\sigma^2$:
+
+```{r}
+media.sigma2 <- mean(datos.rinvchisq)
+media.sigma2
+```
+
+Ahora se creará el Intervalo de Credibilidad al $95\%$ de
+$\frac{\sigma}{\mu}$:
+
+```{r}
+coef.variacion <- datos.sd/datos.mu
+
+# Cálculo del intervalo de confianza
+q025 <- quantile(coef.variacion, probs = 0.025)
+q975 <- quantile(coef.variacion, probs = 0.975)
+print(paste0('Intervalo de credibilidad del coeficiente de variación al 95%: [', q025, ':', q975, ']'))
+
+```
+
+**8.** Por último, querríamos valorar de nuevo la hipótesis
+$H_{0}: \mu < 165$, pero sin asumir conocida la varianza de las alturas
+de los alumnos de la ETSE. Calcula, basado en tu muestra, la
+probabilidad a posteriori de esta hipótesis y valora si es más probable
+ella o su contraria $H_{1}: \mu \ge 165$.
+
+Como no asumimos conocida la varianza de las alturas utilizaremos la
+siguiente distribución de la media del formulario:
+$P(\mu |\textbf{x}) \sim t_{n-1} \left( \bar{x}, \frac{s^{2}}{n} \right)$
+
+```{r}
+n <- length(datos)
+
+media <- mean(datos)
+escala <- ((1/(n-1))*sum((datos-mean(datos))^2))/n
+escala_param <- sqrt(escala)
+
+pt.scaled(q = 165, mean=media, sd=escala_param, df=n-1)
+```
+
+En este caso no podemos rechazar la $H_0$, ni aceptar $H_{1}$, ya que
+$H_1$ es más probable, pero tampoco por mucho.

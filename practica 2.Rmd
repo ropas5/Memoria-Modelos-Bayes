@@ -1,0 +1,20 @@
+---
+title: "Untitled"
+author: "Iker Cuadros Ruiz"
+date: "2024-10-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(extraDistr)
+probs<- dbbinom(0:6, size=6, alpha = 8.4375, beta = 21.3125)
+plot(0:6,probs,type="h",
+ylab= "P(Predicción=x)", xlab = "x: número de personas con COVID",
+main= "Distribución predictiva a priori", ylim=c(0,0.8))
+points(0:6,probs, pch=19)
+```
+
