@@ -94,7 +94,7 @@ cat(
   beta0 ~ dnorm(0, 0.001)
   beta1 ~ dnorm(0, 0.001)
   
-}", file="poissonReg.jags")
+}", file="modelos_jags/poissonReg.jags")
 ```
 
 Con el modelo ya definido, definimos los argumentos que nos valdrán para
@@ -116,7 +116,7 @@ la simulación:
 set.seed(1)
 
 resul.pois <- jagsUI::jags(data = datos, inits=iniciales, parameters.to.save=parametros,
-                           model.file = 'poissonReg.jags', 
+                           model.file = 'modelos_jags/poissonReg.jags', 
                            n.chains=5, n.iter=10000, n.burnin=1000, n.thin=15)
 
 resul.pois
@@ -175,7 +175,7 @@ cat(
   logit(pinueva)<-beta0+beta1*28
   predictiva~dbin(pinueva,6)
   
-}", file="poissonReg2.jags")
+}", file="modelos_jags/poissonReg2.jags")
 ```
 
 Redifinimos los parametros:
@@ -191,7 +191,7 @@ set.seed(1)
 
 resul.pois2 <- jagsUI::jags(data = datos, inits = iniciales, 
                            parameters.to.save = parametros,
-                           model.file = 'poissonReg2.jags', 
+                           model.file = 'modelos_jags/poissonReg2.jags', 
                            n.chains=5, n.iter=10000, n.burnin=1000, n.thin=15)
 
 resul.pois2
@@ -239,7 +239,7 @@ cat(
     beta0 ~dnorm(0,0.0001)
     beta1 ~dnorm(0,0.0001)
   
-  }", file = "accidentes.jags")
+  }", file = "modelos_jags/accidentes.jags")
 ```
 
 ```         
@@ -259,6 +259,7 @@ Year <- c(1851, 1852, 1853, 1854, 1855, 1856, 1857, 1858, 1859,
 1933, 1934, 1935, 1936, 1937, 1938, 1939, 1940, 1941, 1942, 1943, 
 1944, 1945, 1946, 1947, 1948, 1949, 1950, 1951, 1952, 1953, 1954, 
 1955, 1956, 1957, 1958, 1959, 1960, 1961, 1962)
+# Modificamos la fecha para que podamos trabajar megor con el modelo, teniendo la media cntrada en 0
 media_anyo <- mean(Year)
 Year <- Year - media_anyo
 
@@ -285,7 +286,7 @@ Una vez disponemos de los argumentos llamamos a JAGS para llevar a cabo la simul
 set.seed(1)
 
 resul.pois3 <- jagsUI::jags(data=datos, inits= iniciales, parameters = parametros,
-                          model.file = "accidentes.jags", n.chains = 3, 
+                          model.file = "modelos_jags/accidentes.jags", n.chains = 3, 
                           n.iter=10000, n.burnin = 1000, n.thin=15)
 
 resul.pois3 
