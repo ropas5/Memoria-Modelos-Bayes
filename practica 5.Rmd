@@ -66,17 +66,18 @@ para simular de la muestra a posteriori con MCMC.
     simulación que vamos a utilizar, no permite el uso de distribuciones
     impropias ¿Qué propuesta de distribución inicial te parece adecuada
     para estos parámetros y válida en **JAGS**?
-    
+
     Variable de respuesta: Número de juntas tóricas rotas
-    
+
     Variable explicativa: Temperatura
-    
-    Como son conteos de juntas tóricas rotas sabemos que la variable de respuesta seguirá una distribución de Poisson y por tanto la regresión a aplicar será la de Poisson.
-    
-    
+
+    Como son conteos de juntas tóricas rotas sabemos que la variable de
+    respuesta seguirá una distribución de Poisson y por tanto la
+    regresión a aplicar será la de Poisson.
+
 2.  Utiliza **JAGS** para hacer inferencia sobre el modelo de regresión
     logística que acabas de describir.
-    
+
     El modelo descrito anteriormente podría adaptarse a lo siguiente:
 
 ```{r}
@@ -96,7 +97,8 @@ cat(
 }", file="poissonReg.jags")
 ```
 
-Con el modelo ya definido, definimos los argumentos que nos valdrán para ejecutarlo:
+Con el modelo ya definido, definimos los argumentos que nos valdrán para
+ejecutarlo:
 
 ```{r}
 datos <- list(JUNTAS_ROTAS = c(0,1,0,0,0,0,0,0,1,1,1,0,0,2,0,0,0,0,0,0,2,0,1),
@@ -107,7 +109,8 @@ iniciales <- function(){list(beta0=rnorm(1), beta1=rnorm(1))}
 parametros <- c('beta0', 'beta1')
 ```
 
-Una vez disponemos de los argumentos llamamos a JAGS para llevar a cabo la simulación:
+Una vez disponemos de los argumentos llamamos a JAGS para llevar a cabo
+la simulación:
 
 ```{r}
 set.seed(1)
@@ -126,8 +129,8 @@ resul.pois
 traceplot(resul.pois)
 ```
 
-Tal y como anticipan los valores de rhat y n.eff la convergencia parece buena.
-
+Tal y como anticipan los valores de rhat y n.eff la convergencia parece
+buena.
 
 4.  Una vez simuladas las muestras de la distribución a posteriori de
     ambos parámetros podemos utilizarlas para hacer inferencia.
@@ -151,9 +154,10 @@ plot(resul.pois)
     del número de juntas tóricas rotas a $28$ grados Fahrenheit ¿Qué
     numero medio de juntas rotas esperarías encontrar en un cohete
     lanzado a esa temperatura?
-    
-    Modificamos el codigo anterior para poder contestar a las nuevas preguntas.
-    
+
+    Modificamos el codigo anterior para poder contestar a las nuevas
+    preguntas.
+
 ```{r}
 cat(
 "model{
@@ -193,7 +197,6 @@ resul.pois2 <- jagsUI::jags(data = datos, inits = iniciales,
 resul.pois2
 ```
 
-
 ### Actividad 2: Modelización de conteos haciendo uso de JAGS
 
 El archivo `mining.Rdata` contiene el número anual de accidentes
@@ -211,17 +214,18 @@ mostrar dicha serie.
     accidentes anuales en minas británicas en función del año del
     periodo de estudio. Ten en cuenta nuevamente la limitación de
     **JAGS** en cuanto al uso de distribuciones impropias.
-    
+
     Variable de respuesta: Número de accidentes en las minas
-    
+
     Variable explicativa: Año en el que se produjeron
-    
-    Como son conteos de accidentes sabemos que la variable de respuesta seguirá una distribución de Poisson y por tanto la regresión a aplicar será la de Poisson.
-    
-    
+
+    Como son conteos de accidentes sabemos que la variable de respuesta
+    seguirá una distribución de Poisson y por tanto la regresión a
+    aplicar será la de Poisson.
+
 2.  Utiliza **JAGS** para hacer inferencia sobre el modelo de regresión
     que acabas de plantear.
-    
+
 ```{r}
 cat(
   "model{
@@ -237,7 +241,10 @@ cat(
   
   }", file = "accidentes.jags")
 ```
-    Con el modelo ya definido, definimos los argumentos que nos valdrán para ejecutarlo:
+
+```         
+Con el modelo ya definido, definimos los argumentos que nos valdrán para ejecutarl:
+```
 
 ```{r}
 Year <- c(1851, 1852, 1853, 1854, 1855, 1856, 1857, 1858, 1859,
@@ -270,7 +277,9 @@ iniciales <- function(){list(beta0 = rnorm(1), beta1 = rnorm(1))}
 parametros <- c("beta0", "beta1")
 ```
 
-    Una vez disponemos de los argumentos llamamos a JAGS para llevar a cabo la simulación:
+```         
+Una vez disponemos de los argumentos llamamos a JAGS para llevar a cabo la simulación:
+```
 
 ```{r}
 set.seed(1)
@@ -295,28 +304,31 @@ traceplot(resul.pois3)
     dicha relación significativa? Da (e interpreta) un intervalo de
     credibilidad al $95\%$ para el parámetro que controla dicha
     relación.
-    
-    
+
     Primero calculamos el intervalo de credibilidad al $95\%$
-```{r}
-summary(resul.pois3)
-```
-    El intervalo de credibilidad al 95% de $\beta_1$ es [-0.02354788, -0.01394777] lo que significa que no incluye el valor 0. Por lo tanto, la relación entre los años y el número de accidentes es estadísticamente significativa. Como $\beta_1 < 0$ esto significa que conforme aumentan los años se espera que el nuemro de accidentes baje.
+
+    ```{r}
+    summary(resul.pois3)
+    ```
+
+    El intervalo de credibilidad al 95% de $\beta_1$ es [-0.02354788,
+    -0.01394777] lo que significa que no incluye el valor 0. Por lo
+    tanto, la relación entre los años y el número de accidentes es
+    estadísticamente significativa. Como $\beta_1 < 0$ esto significa
+    que conforme aumentan los años se espera que el nuemro de accidentes
+    baje.
 
 5.  Genera una muestra de la distribución predictiva del número de
     accidentes predichos al año siguiente de concluir el estudio ¿Que
     probabilidad encuentras de que no haya ningún accidente ese año? ¿y
     $2$ o más?
-    
-    El modelo predictivo seria el siguiente:
-    $$
+
+    El modelo predictivo seria el siguiente: $$
     \lambda_{k+1}=e^{\beta_0 + \beta_1 Year_{k+1}}
-    $$
-    $$
+    $$ $$
     Prediccio ~ Po(\lambda_{k+1})
     $$
-    
-    
+
 ```{r}
 nuevo_anyo <- 1963 - media_anyo #al anño que queremos calcular le restamos la media para adecuar los datos conforme se ha entrenado al modelo
 
@@ -331,14 +343,18 @@ numero_accidentes <- rpois(1, lambda = lambda_predict)
 numero_accidentes
 
 ```
-Calculamos la probabilidad de que no haya accidentes 
+
+Calculamos la probabilidad de que no haya accidentes:
+
 $P(Count = 0)$
+
 ```{r}
 dpois(0,lambda = lambda_predict)
 ```
 
 Calculamos la probabilidad de que haya mas de 2 accidentes
-$P(Count\ge 2) = 1- P(Count = 0)+ P(Count = 1)$
+:$P(Count\ge 2) = 1- P(Count = 0)+ P(Count = 1)$
+
 ```{r}
 1 - dpois(0,lambda = lambda_predict) + dpois(1,lambda = lambda_predict)
 ```
