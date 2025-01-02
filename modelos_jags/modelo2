@@ -1,0 +1,10 @@
+model{
+  # Definimos la verosimilutud
+  for (i in 1:length(DATOS_FALLOS)) {
+    DATOS_FALLOS[i] ~ dpois(lambda*TIEMPO[i])
+  }
+  
+  # A priori
+  lambda ~ dunif(0, 1000)
+  #lambda ~ dgamma(0.1, 0.1)
+}

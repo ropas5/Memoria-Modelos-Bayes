@@ -93,7 +93,33 @@ cuestiones:
 ETSE que asuma que dicha altura está en torno a 170 cm, con una desviación típica
 de 2 cm, y obtén la distribución a posteriori correspondiente.
 
-*Hecho en las hojas*
+Distribución previa conjugada (del formulario):
+
+$$
+\mu \sim N(\nu=170, \tau=2^2)
+$$
+
+Distribución a posteriori (del formulario también):
+
+Para ello hará falta calcular w:
+
+$$
+w = \frac{ \frac{ \sigma^{2} }{ n } }{ \frac{ \sigma^{2} }{ n } + \tau^2 } = \frac{ \frac{ 10^{2} }{ 18 } }{ \frac{ 10^{2} }{ 18 } + 2^2 } = \frac{25}{43} \simeq 0.58
+$$
+
+Una vez calculada w mostramos como queda la distribución a posteriori
+
+$$
+\mu | \vec{x} \sim N(w \nu + (1-w) \overline{x}, \ \frac{ \sigma^{2} }{n}(1-w))
+$$
+
+$$
+\mu | \vec{x} \sim N\left( \frac{25}{43} \cdot 170 + \left(1 - \frac{25}{43} \right) \cdot \frac{496}{3}, \ \frac{ 10^{2} }{18} \cdot \left( 1 - \frac{25}{43}\right) \right)
+$$
+
+$$
+\mu | \vec{x} \sim N\left( \frac{7226}{43} ,\frac{100}{43}  \right) \simeq N\left( 168.05, \ 2.33 \right)
+$$
 
 **2.-** Representa las distribuciones a priori y a posteriori de la altura media de los alumnos
 de la ETSE obtenidas en el apartado anterior.
@@ -202,6 +228,8 @@ La distribución predictiva a posteriori para una normal de la cual se conoce su
 $$x^*| \textbf{x} \sim  N(w \cdot \nu + (1-w) \cdot \bar{x}, \sigma^2 + \frac{\sigma^2}{n} \cdot (1-w)), \space Donde \space w=\frac{\frac{\sigma^2}{n}}{\frac{\sigma^2}{n}+\tau^2} $$
 
 ```{r}
+datos.alumnos.etse <- c(168, 174, 182, 167, 168, 155, 154, 164, 154, 160, 176, 165, 149, 160, 177, 150, 179, 174)
+
 # Calculamos w, mu.pred.post, sd.pred.post
 w <- (10^2/18)/((10^2/18)+2^2)
 
@@ -253,7 +281,19 @@ debería llegar 1/15 autobuses por minuto. Plantea una distribución previa conj
 para el parámetro de la distribución exponencial (número de llegadas a la parada por
 minuto) acorde a esta información y con desviación típica de 0.05 unidades.
 
-!!! Pasar a latex ejercicio en la hoja
+Vamos a obtener los valores de a y b de la distribución a priori conjugada:
+
+Tenemos que $\frac{a}{b} = \frac{1}{15}$, por tanto, $a = \frac{b}{15}$
+
+Por otro lado, tenemos que $\frac{a}{b^2}=0.05^2$ de donde obtenemos que $a = 0.05^2 \cdot b^2$
+
+Con esto podemos obtener los valores de $a$ y $b$ que son los siguientes: $a = \frac{16}{9}$ y $b=\frac{80}{3}$
+
+Y por tanto, podemos definir la distribución a priori conjugada de $\frac{1}{\lambda}$
+
+$$
+\frac{1}{\lambda} \sim Gamma(a, b) = Gamma(\frac{16}{9}, \frac{80}{3})
+$$
 
 ```{r}
 a.priori <- 16/9
@@ -268,7 +308,13 @@ plot(x, dist.priori, type = "l", col = "blue", lwd = 2,
 
 **2.-** Calcula la distribución a posteriori correspondiente a esta prior y resume dicha distribución mediante su media, moda y mediana a posteriori, así como un intervalo de credibilidad a posteriori del 95 %. Representa toda la información que has calculado.
 
-!!! Pasar a latex ejercicio en la hoja
+$$
+\frac{1}{\lambda} | x \sim Gamma\left(n+a, \ \sum_{i=1}^{n}{x_{i}}+b \right)
+$$
+
+$$
+\frac{1}{\lambda} | x \sim Gamma\left( 10 + \frac{16}{9}, \ 15.7 + 16.9 + \cdots + 26.2 + 15.6 + \frac{80}{3} \right)
+$$
 
 ```{r}
 a.posteriori <- n+a.priori
@@ -286,11 +332,28 @@ legend("topright", legend = c("Distribución predictiva a priori", "Distribució
        col = c("blue", "green"), lwd = 2)
 ```
 
-[Por hacer]
-Calcular:
-- Media de una gamma (0.053)
-- Moda de una gamma (0.049)
-- Mediana de una gamma (qgamma(0.5...)=0.052)
+Calculo de:
+
+- Media de la gamma
+
+```{r}
+a.posteriori / b.posteriori
+```
+
+- Moda de una gamma
+
+```{r}
+(a.posteriori - 1)/b.posteriori
+```
+
+- Mediana de una gamma
+
+```{r}
+mediana <- qgamma(0.5, shape = a.posteriori, rate = b.posteriori)
+mediana
+```
+
+
 - Intervalo de credibilidad al 95%
 
 **3.-** Según comentábamos, la EMT anuncia una tasa de llegada de 1/15 autobuses por
@@ -298,9 +361,12 @@ minuto para el tramo horario en el que se han tomado las mediciones. Contrasta l
 hipótesis de que la tasa real de llegadas es menor que lo anunciado por la EMT.
 
 $$
-H_{0}: \lambda \ge 1/15 \\
-H_{A}: \lambda \lt 1/15
+H_{0}: \lambda \lt 1/15 \\
+H_{A}: \lambda \ge 1/15
 $$
 
-[Por hacer]
-Calcular la probabilidad y ya está
+```{r}
+pgamma(1/15, shape = a.posteriori, rate = b.posteriori)
+```
+
+No hay evidencia suficiente para rechazar la hipótesis nula $H_{0}$ pero parece bastante probable que sea $\gt \frac{1}{15}$

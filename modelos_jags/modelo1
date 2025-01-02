@@ -1,0 +1,19 @@
+model{
+  # Definimos la verosimilutud
+  for (i in 1:length(DATOS_BRILLO)) {
+    DATOS_BRILLO[i] ~ dnorm(mu[i], tau)
+    mu[i] <- beta0 + beta1[OPERARIO[i]]
+  }
+  
+  # A priori
+  tau <- sigma^(-2)
+  sigma ~ dunif(0, 100)
+  
+  beta0 ~ dnorm(0, 0.001)
+  for (j in 1:4) {
+    beta1[j] ~ dnorm(0, tauOp)
+  }
+  tauOp <- sigmaOp^(-2)
+  sigmaOp ~ dunif(0, 100)
+
+}
