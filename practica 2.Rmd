@@ -25,7 +25,10 @@ Como hay más de un lacasito, tenemos $n$ núemor de pruebas $$
 X \sim Binomial(n,\pi)
 $$
 
-2.  Cuenta cuántos lacasitos hay y cuántos de ellos son rojos en el bote que se te ha proporcionado. A partir de dichos valores construye la función de verosimilitud del modelo. En el bote hay 22 lacasitos con 4 de ellos rojo ($n = 22$, $X=4$): Constrimos la funcion de verosimilitud de la Binomial $$
+2.  Cuenta cuántos lacasitos hay y cuántos de ellos son rojos en el bote que se te ha proporcionado. A partir de dichos valores construye la función de verosimilitud del modelo. En el bote hay 22 lacasitos con 4 de ellos rojo ($n = 22$, $X=4$): 
+
+Constrimos la funcion de verosimilitud de la Binomial 
+$$
     l(\pi)  \propto \pi^r(1-\pi)^{n-r}
     $$ En donde: $$
     r =  \sum^n_{i=0}X_i 
@@ -90,6 +93,7 @@ Dibujamos las gráficas
 ```{r}
 # Librerías
 library(ggplot2)
+library(tidyr)
 
 # Valores de pi
 pi_vals <- seq(0, 1, length.out = 1000)
@@ -105,7 +109,7 @@ b2 <- 0.5
 
 # Posterior informativa
 r <- 4
-n <- 22
+n <- 31
 posterior_a1 <- r + a1
 posterior_b1 <- n - r + b1
 
@@ -122,16 +126,18 @@ densities <- data.frame(
   Posterior_NoInformativa = dbeta(pi_vals, posterior_a2, posterior_b2)
 )
 
+
+densities_long <- densities %>%
+  pivot_longer(cols = -pi, names_to = "Distribucion", values_to = "Densidad")
+
 # Graficar
-ggplot(densities, aes(x = pi)) +
-  geom_line(aes(y = densities$Priori_Informativa))+
-  geom_line(aes(y = densities$Priori_NoInformativa))+
-  geom_line(aes(y = densities$Posterior_Informativa))+
-  geom_line(aes(y = densities$Posterior_NoInformativa))+
+ggplot(densities_long, aes(x = pi, y = Densidad, color = Distribucion)) +
+  geom_line(size = 1) +
   labs(title = "Distribuciones a priori y a posteriori de π",
-       x = expression(pi), y = "Densidad") 
+       x = expression(pi), y = "Densidad") +
+  scale_color_manual(values = c("blue", "orange", "green", "red"))
 
-
+#
 ```
 
 
@@ -175,12 +181,12 @@ pbbinom(2,10,51.5,297.5)
 
 
 ```{r}
-library(extraDistr)
-probs<- dbbinom(0:6, size=6, alpha = 8.4375, beta = 21.3125)
-plot(0:6,probs,type="h",
-ylab= "P(Predicción=x)", xlab = "x: número de personas con COVID",
-main= "Distribución predictiva a priori", ylim=c(0,0.8))
-points(0:6,probs, pch=19)
+#library(extraDistr)
+#probs<- dbbinom(0:6, size=6, alpha = 8.4375, beta = 21.3125)
+#plot(0:6,probs,type="h",
+#ylab= "P(Predicción=x)", xlab = "x: número de personas con COVID",
+#main= "Distribución predictiva a priori", ylim=c(0,0.8))
+#points(0:6,probs, pch=19)
 ```
 
 ### Actividad 2: ¿Cuántos hijos/as hasta el primer niño?
@@ -189,9 +195,67 @@ Antiguamente las familias estaban muy interesadas en tener descendientes masculi
 
 1.  Construye un modelo que pueda describir la situación, enumerando: la variable de interés, su distribución de probabilidad correspondiente (ayuda: ¿distribución geométrica?), los datos, el parámetro de interés y los posibles valores que puede tomar
 
+$$
+X = \text{Número de hijos hasta primer chico} $$
+
+$$
+X \in [0,\inf +]
+
+$$
+
+
+$$
+X \sim Geometrica(\pi)
+$$
+
+$$
+\pi = \text{Probabilidad de que el hijo sea mujer}
+$$
 2.  Construye la verosimilitud de los datos.
 
+Constrimos la funcion de verosimilitud de la geometrica:
+$$
+l(\pi) \propto(1-\pi)^{\sum x_i -n}\pi^n 
+$$
+$$
+l(\pi) \propto  (1-\pi)^{33-10}\pi^{10}
+$$
+
 3.  Propón una previa conjugada informativa que asuma la misma probabilidad para ambos sexos y una desviación típica a priori para dicho parámetro de 0.1.
+
+La previa conjugada de una $Geométrica$ es una $Beta(a,b)$.
+
+Calculamos $a$ y $b$:
+
+$$ E(\pi)= \frac{a}{a+b}=0.5\rightarrow  a=0.5(a+b)$$
+$$
+a=b
+$$
+$$Var(\pi)=\frac{ab}{(a+b)^2(a+b+1)} =0,1^2 \rightarrow$$
+$$
+\frac{a^2}{(2a)^2(2a+1)}=
+$$
+$$
+\frac{a^2}{4a^2(2a+1)}=
+$$
+
+$$
+\frac{1}{4(2a+1)}=0,1^2
+$$
+$$
+1=0.04(2a+1) 
+$$
+$$
+a=\frac{1-0.04}{0.08} =12
+$$
+
+$$
+a=b=12
+$$
+
+$$
+\pi \sim Beta(12,12)
+$$
 
 4.  Obtén la distribución a posteriori del parámetro y representa las distribuciones a priori y a posteriori ¿Te parece que la información inicial que has utilizado está muy de acuerdo con lo observado en los datos de tu población?
 
