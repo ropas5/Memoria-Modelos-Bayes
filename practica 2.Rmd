@@ -137,7 +137,6 @@ ggplot(densities_long, aes(x = pi, y = Densidad, color = Distribucion)) +
        x = expression(pi), y = "Densidad") +
   scale_color_manual(values = c("blue", "orange", "green", "red"))
 
-#
 ```
 
 
@@ -258,6 +257,54 @@ $$
 $$
 
 4.  Obtén la distribución a posteriori del parámetro y representa las distribuciones a priori y a posteriori ¿Te parece que la información inicial que has utilizado está muy de acuerdo con lo observado en los datos de tu población?
+
+
+ La distribución a posteriori de una geométrica sigue la siguiente formula:
+ $$
+ \pi | x \sim Beta(n+a, \sum x_i -n +b)
+ $$
+ $$
+  \pi | x \sim Beta(10+12, 33 -10+12) =
+ $$
+ $$
+ Beta(22,35)
+ $$
+
+```{r}
+# Valores de pi
+pi_vals <- seq(0, 1, length.out = 1000)
+
+# Parámetros de las distribuciones
+# Priori informativa
+a <- 12
+b <- 12
+
+# Posterior informativa
+xi <- c(3,4,2,3,3,2,1,5,8,2)
+n <- 10
+posterior_a <- n+a
+posterior_b <- sum(xi) - n +b
+
+# Calcular densidades
+densities <- data.frame(
+  pi = pi_vals,
+  Priori_Informativa = dbeta(pi_vals, a, b),
+  Posterior_Informativa = dbeta(pi_vals, posterior_a, posterior_b)
+)
+
+
+densities_long <- densities %>%
+  pivot_longer(cols = -pi, names_to = "Distribucion", values_to = "Densidad")
+
+# Graficar
+ggplot(densities_long, aes(x = pi, y = Densidad, color = Distribucion)) +
+  geom_line(size = 1) +
+  labs(title = "Distribuciones a priori y a posteriori de π",
+       x = expression(pi), y = "Densidad") +
+  scale_color_manual(values = c("blue", "orange"))
+
+```
+
 
 5.  Deduce una distribución inicial no informativa para el porcentaje de niños sobre el total de hijos/as de las familias. Calcula la posterior para dicha previa. Representa y compara la distribución a posteriori correspondiente a ambas previas ¿Observas diferencias importantes entre ambas distribuciones a posteriori? ¿A qué crees que se deben?
 
