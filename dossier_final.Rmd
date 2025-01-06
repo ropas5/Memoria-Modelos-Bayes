@@ -318,6 +318,357 @@ $$
 
 # PRÁCTICA 2: INFERENCIA Y PREDICIÓN BAYESIANA
 
+### Actividad 1: Estimación de la proporción de lacasitos rojos
+
+Esta es una actividad para realizar en grupos de cuatro o cinco personas. Vuestro objetivo será hacer inferencia sobre la proporción de lacasitos que son de color rojo. Para hacerlo se os da un bote de lacasitos de donde obtendréis vuestros datos
+
+1.  Construye un modelo Bernoulli que pueda describir la situación, enumerando: la variable e interés, su distribución de probabilidad correspondiente, los datos, el parámetro de interés y los posibles valores que puede tomar.
+
+El color de cada lalacasito puede ser rojo o no rojo $=Y$
+
+$$
+\pi \rightarrow \text{Proporcion de lacasitos de color rojo}
+$$ $$
+Y \sim ~ Bernoulli(\pi)
+$$
+
+Como hay más de un lacasito, tenemos $n$ núemor de pruebas $$
+X \sim Binomial(n,\pi)
+$$
+
+2.  Cuenta cuántos lacasitos hay y cuántos de ellos son rojos en el bote que se te ha proporcionado. A partir de dichos valores construye la función de verosimilitud del modelo. En el bote hay 22 lacasitos con 4 de ellos rojo ($n = 22$, $X=4$):
+
+Constrimos la funcion de verosimilitud de la Binomial $$
+    l(\pi)  \propto \pi^r(1-\pi)^{n-r}
+    $$ En donde: $$
+    r =  \sum^n_{i=0}X_i 
+    $$ $$
+    l(\pi)=  \pi^4(1-\pi)^{18}
+    $$
+
+3.  Sabiendo que en el paquete vienen lacasitos de 7 colores, propón una previa (informativa) conjugada para la proporción de lacasitos rojos que asuma que todos los colores tienen la misma probabilidad y con una desviación típica de 0.1 unidades.
+
+$E(\pi)= \frac{1}{7}$ $Var(\pi)=0,1^2$
+
+La previa informativa de una Bernoulii o Binomail es una $Beta(a,b)$.
+
+$$
+\pi \sim Beta(a,b)
+$$
+
+Calculamos $a$ y $b$:
+
+$$ E(\pi)= \frac{a}{a+b}=\frac{1}{7}\rightarrow  7a =a+b$$ $$
+6a=b
+$$ $$Var(\pi)=\frac{ab}{(a+b)^2(a+b+1)} =0,1^2 \rightarrow$$ $$
+\frac{a\cdot 6a}{(a+6a)^2(a+6a+1)}=
+$$ $$
+\frac{6a^2}{(49a)^2(7a+1)}=
+$$
+
+$$
+\frac{6}{343a+49}=0,1^2
+$$ $$
+600 =343a +49 \rightarrow a=1.6064
+$$ $$
+b=6a=6\cdot 1.6064= 9.6385
+$$
+
+$$
+\pi \sim Beta(1.6064,9.6385)
+$$
+
+4.  Alternativamente, propón una previa no informativa para dicho parámetro.
+
+Al pedirnos una previa no informativa, calulamos la previa de Jeffreys del formulario $$
+\pi \sim Beta(\frac{1}{2},\frac{1}{2})
+$$
+
+5.  Obtén y representa gráficamente las distribuciones a priori y a posteriori de la proporción de lacasitos rojos para ambas previas ¿Cuál de ambas distribuciones a posteriori es más apuntada? ¿Por qué?
+
+La posteriori la calculamos como:
+
+$$
+Beta(r+a, n-r+b)= Beta(5.6064, 26.6385)
+$$
+
+Dibujamos las gráficas
+
+```{r}
+# Librerías
+library(ggplot2)
+library(tidyr)
+
+# Valores de pi
+pi_vals <- seq(0, 1, length.out = 1000)
+
+# Parámetros de las distribuciones
+# Priori informativa
+a1 <- 1.6064
+b1 <- 9.6385
+
+# Priori no informativa (Jeffreys)
+a2 <- 0.5
+b2 <- 0.5
+
+# Posterior informativa
+r <- 4
+n <- 31
+posterior_a1 <- r + a1
+posterior_b1 <- n - r + b1
+
+# Posterior no informativa
+posterior_a2 <- r + a2
+posterior_b2 <- n - r + b2
+
+# Calcular densidades
+densities <- data.frame(
+  pi = pi_vals,
+  Priori_Informativa = dbeta(pi_vals, a1, b1),
+  Priori_NoInformativa = dbeta(pi_vals, a2, b2),
+  Posterior_Informativa = dbeta(pi_vals, posterior_a1, posterior_b1),
+  Posterior_NoInformativa = dbeta(pi_vals, posterior_a2, posterior_b2)
+)
+
+
+densities_long <- densities %>%
+  pivot_longer(cols = -pi, names_to = "Distribucion", values_to = "Densidad")
+
+# Graficar
+ggplot(densities_long, aes(x = pi, y = Densidad, color = Distribucion)) +
+  geom_line(size = 1) +
+  labs(title = "Distribuciones a priori y a posteriori de π",
+       x = expression(pi), y = "Densidad") +
+  scale_color_manual(values = c("blue", "orange", "green", "red"))
+
+```
+
+6.  Utiliza la expresión de la distribución predictiva para un proceso Bernoulli que viene en los apuntes de teoría. A partir de ella representa la distribución predictiva a posteriori, asumiendo una previa no informativa, para el número de lacasitos rojos en una caja de 10 unidades ¿Qué probabilidad a posteriori estimas de que la nueva caja contenga menos de 2 lacasitos rojos?
+
+Predictiva no inforativa a posteriori $$
+x^{*}| x \sim Beta-Bin(m, r+\frac{1}{2},n-r+\frac{1}{2}) 
+$$
+
+Siendo que: $m=10$ $a=\frac{7}{2}$ $b=  \frac{29}{2}$
+
+$$
+Beta-Bin(10,\frac{7}{2},\frac{29}{2})
+$$
+
+Calulamos la probabilidad de X=2:
+
+$P(X=2)$
+
+```{r}
+library(extraDistr)
+pbbinom(2,10,7/2,29/2)
+```
+
+7.  Por último, utiliza ahora los datos de todos los botes de lacasitos de todos los compañeros de tu grupo de prácticas. Obtén y representa la distribución a posteriori de la proporción de lacasitos rojos, utilizando una previa no informativa, junto a la que habías obtenido haciendo uso sólo de tus datos.
+
+$$
+Beta-Bin(10, 51+\frac{1}{2},348-51+\frac{1}{2})= Beta-Bin(10,51.5,297.5)
+$$
+
+```{r}
+pbbinom(2,10,51.5,297.5)
+```
+
+### Actividad 2: ¿Cuántos hijos/as hasta el primer niño?
+
+Antiguamente las familias estaban muy interesadas en tener descendientes masculinos. Esto hizo que las familias siguieran teniendo hijos/as hasta que conseguían al menos un niño. A veces solía tomar tanto tiempo que pensaban que la probabilidad de tener un niño era menor de 0.5. Supongamos que se observan el siguiente número de hijos hasta que conseguir al niño $(3,4,2,3,3,2,1,5,8,2)$ para un conjunto de 10 familias. Basado en estos datos:
+
+1.  Construye un modelo que pueda describir la situación, enumerando: la variable de interés, su distribución de probabilidad correspondiente (ayuda: ¿distribución geométrica?), los datos, el parámetro de interés y los posibles valores que puede tomar
+
+$$
+X = \text{Número de hijos hasta primer chico}
+$$
+
+$$
+X \in [0,\inf +] 
+$$
+
+$$
+X \sim Geometrica(\pi)
+$$
+
+$$
+\pi = \text{Probabilidad de que el hijo sea mujer}
+$$ 2. Construye la verosimilitud de los datos.
+
+Constrimos la funcion de verosimilitud de la geometrica: $$
+l(\pi) \propto(1-\pi)^{\sum x_i -n}\pi^n 
+$$ $$
+l(\pi) \propto  (1-\pi)^{33-10}\pi^{10}
+$$
+
+3.  Propón una previa conjugada informativa que asuma la misma probabilidad para ambos sexos y una desviación típica a priori para dicho parámetro de 0.1.
+
+La previa conjugada de una $Geométrica$ es una $Beta(a,b)$.
+
+Calculamos $a$ y $b$:
+
+$$ E(\pi)= \frac{a}{a+b}=0.5\rightarrow  a=0.5(a+b)$$ $$
+a=b
+$$ $$Var(\pi)=\frac{ab}{(a+b)^2(a+b+1)} =0,1^2 \rightarrow$$ $$
+\frac{a^2}{(2a)^2(2a+1)}=
+$$ $$
+\frac{a^2}{4a^2(2a+1)}=
+$$
+
+$$
+\frac{1}{4(2a+1)}=0,1^2
+$$ $$
+1=0.04(2a+1) 
+$$ $$
+a=\frac{1-0.04}{0.08} =12
+$$
+
+$$
+a=b=12
+$$
+
+$$
+\pi \sim Beta(12,12)
+$$
+
+4.  Obtén la distribución a posteriori del parámetro y representa las distribuciones a priori y a posteriori ¿Te parece que la información inicial que has utilizado está muy de acuerdo con lo observado en los datos de tu población?
+
+La distribución a posteriori de una geométrica sigue la siguiente formula: $$
+ \pi | x \sim Beta(n+a, \sum x_i -n +b) \rightarrow
+ $$ $$
+  \pi | x \sim Beta(10+12, 33 -10+12) =
+ $$ $$
+ Beta(22,35)
+ $$
+
+```{r}
+# Valores de pi
+pi_vals <- seq(0, 1, length.out = 1000)
+
+# Parámetros de las distribuciones
+# Priori informativa
+a <- 12
+b <- 12
+
+# Posterior informativa
+xi <- c(3,4,2,3,3,2,1,5,8,2)
+n <- 10
+posterior_a <- n+a
+posterior_b <- sum(xi) - n +b
+
+# Calcular densidades
+densities <- data.frame(
+  pi = pi_vals,
+  Priori_Informativa = dbeta(pi_vals, a, b),
+  Posterior_Informativa = dbeta(pi_vals, posterior_a, posterior_b)
+)
+
+
+densities_long <- densities %>%
+  pivot_longer(cols = -pi, names_to = "Distribucion", values_to = "Densidad")
+
+# Graficar
+ggplot(densities_long, aes(x = pi, y = Densidad, color = Distribucion)) +
+  geom_line(size = 1) +
+  labs(title = "Distribuciones a priori y a posteriori de π",
+       x = expression(pi), y = "Densidad") +
+  scale_color_manual(values = c("blue", "orange"))
+
+```
+
+5.  Deduce una distribución inicial no informativa para el porcentaje de niños sobre el total de hijos/as de las familias. Calcula la posterior para dicha previa. Representa y compara la distribución a posteriori correspondiente a ambas previas ¿Observas diferencias importantes entre ambas distribuciones a posteriori? ¿A qué crees que se deben?
+
+Segun el foruario la información previa de Jeffreys de una geométrica es: $$
+\pi \sim Beta(0, \frac{1}{2})
+$$ Y la posteriori de no informativa:
+
+$$
+\pi | x \sim Beta(n, \sum x_i -n +\frac{1}{2}) \rightarrow
+$$
+
+$$
+\pi | x \sim Beta(10, 33-10 +\frac{1}{2}) =
+$$ $$
+Beta(10,23.5)
+$$
+
+```{r}
+# Valores de pi
+pi_vals <- seq(0, 1, length.out = 1000)
+
+# Parámetros de las distribuciones
+# Priori informativa
+a2 <- 0
+b2 <- 1/2
+
+# Posterior informativa
+xi <- c(3,4,2,3,3,2,1,5,8,2)
+
+posterior_a2 <- n+a2
+posterior_b2 <- sum(xi) - n +b2
+
+# Calcular densidades
+densities <- data.frame(
+  pi = pi_vals,
+  Posterior_Informativa = dbeta(pi_vals, posterior_a, posterior_b),
+  Posterior_NoInformativa = dbeta(pi_vals, posterior_a2, posterior_b2)
+)
+
+densities_long <- densities %>%
+  pivot_longer(cols = -pi, names_to = "Distribucion", values_to = "Densidad")
+
+# Graficar
+ggplot(densities_long, aes(x = pi, y = Densidad, color = Distribucion)) +
+  geom_line(size = 1) +
+  labs(title = "Distribuciones Informativa y No Informativa a posteriori de π",
+       x = expression(pi), y = "Densidad") +
+  scale_color_manual(values = c("orange", "blue"))
+```
+
+Podemos ver como la no informativa refleja mayor incertidumbre sobre la probabilidad de tener hijos varones. Mientras que en la otra es una grafica más apuntada, que refleja la simetría en las proporciones de niños y niñas.
+
+6.  Por último, vamos a comparar los resultados bayesianos que hemos obtenido con los que obtendríamos con un procedimiento frecuentista. Utilizando la función de verosimilitud que has determinado previamente halla el estimador máximo verosímil para la proporción de descendientes masculinos. Representa el estimador máximo verosimil, como una línea vertical, junto a las distribuciones a posteriori del ejercicio anterior ¿Cuál de los dos previas utilizadas hasta ahora te parece más oportuna desde un punto de vista frecuentista?
+
+Resolevmos la Verosimilitud Primero aplicamos logaritmos a la ecuación
+
+$$
+ log (l(\pi)) = 23\cdot log(1-\pi) + 10\cdot log (\pi) 
+$$
+
+Ahora tenemos que aplicar la derivada parcial sobre la variable de interes y igualar a 0.
+
+$$
+\frac{\partial log (l(\pi))}{\partial \pi}= \frac{10}{\pi}- \frac{23}{1-\pi} \rightarrow
+$$
+
+$$
+\frac{10}{\pi}- \frac{23}{1-\pi} = 0
+$$ $$
+\frac{10}{\pi}= \frac{23}{1-\pi}
+$$ $$
+10(1-\pi) =23\pi
+$$
+
+$$
+10=23\pi +10\pi
+$$ $$
+\hat{\pi}_{EMV} =\frac{10}{33} 
+$$
+
+```{r}
+emv <- 10/33
+ggplot(densities_long, aes(x = pi, y = Densidad, color = Distribucion)) +
+  geom_line(size = 1) +
+  geom_vline(xintercept = emv, color = "red", linetype = "dashed", size = 1)+
+  labs(title = "Comparación de Distribuciones a Posteriori con el EMV  ",
+       x = expression(pi), y = "Densidad") +
+  scale_color_manual(values = c("orange", "blue"))
+```
+
+Desde un punto de vista frecuentista se usaria la posterior no informativa, dado que esta mas centrada en el $\hat{\pi}_{EMV}$, esto se da dado que el $\hat{\pi}_{EMV}$ ya que no introduce información adicional.
+
+
 # PRÁCTICA 3: INFERENCIA Y PREDICCIÓN BAYESIANA
 
 ## Actividad 1
